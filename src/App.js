@@ -1,6 +1,6 @@
 function App() {
   return (
-    <>CSC 322 - Twitter Clone</>
+    <p className="font-bold">CSC 322 - Twitter Clone</p>
   );
 }
 
