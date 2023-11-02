@@ -10,6 +10,9 @@ import {
   SettingOutlined,
 } from "@ant-design/icons";
 import { ConfigProvider, Layout, Menu } from "antd";
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient('https://gopjsvqjoeoawvccsgax.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvcGpzdnFqb2VvYXd2Y2NzZ2F4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTY4OTQxNTQsImV4cCI6MjAxMjQ3MDE1NH0.1sT3E8bYnevWNP5VOpw7wExvzJa8SUSVm6AuFkL-BLQ')
 const { Content, Sider } = Layout;
 
 function getItem(label, key, icon, children) {
@@ -20,6 +23,29 @@ function getItem(label, key, icon, children) {
     label,
   };
 }
+
+export async function testSupabaseInsert() {
+  try {
+    const currentTime = new Date(); 
+    const formattedValue = `Current time : ${currentTime}`; 
+    const { data, error } = await supabase
+      .from('testing_table')
+      .insert([
+        { value: formattedValue }, 
+      ]);
+
+    if (error) {
+      console.error('Supabase insert error:', error);
+    } else {
+      console.log('Supabase insert successful:', data);
+    }
+  } catch (error) {
+    console.error('An error occurred:', error);
+  }
+}
+
+
+
 const items = [
   getItem("Home", "1", <HomeFilled />),
   getItem("Search", "2", <SearchOutlined />),
