@@ -1,8 +1,9 @@
 import { Input, Select, Button } from 'antd';
+import { useState } from 'react';
 //This is only the fuctionality, styling still needs to be done. Hence it is still incomplete
 const { Search } = Input;
 
-function Search() {
+function SearchPage () {
 
   const [searchText, setSearchText] = useState('');
   const [filter, setFilter] = useState('all');
@@ -23,10 +24,10 @@ function Search() {
         defaultValue="all" 
         onChange={value => setFilter(value)}
       >
-        <Option value="all">All</Option>  
-        <Option value="text">Text Only</Option>
-        <Option value="images">With Images</Option>
-        <Option value="videos">With Videos</Option>
+        <option value="all">All</option>  
+        <option value="text">Text Only</option>
+        <option value="images">With Images</option>
+        <option value="videos">With Videos</option>
       </Select>
 
       <Button 
@@ -40,4 +41,4 @@ function Search() {
 
 }
 
-export default Search;
+export default SearchPage;

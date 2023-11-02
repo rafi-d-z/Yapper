@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Home from "./components/Home";
-import Search from "./components/Search";
+import SearchPage from "./components/Search";
 import Settings from "./components/Settings";
 import {
   SearchOutlined,
@@ -70,7 +70,7 @@ function App() {
           </Sider>
           <Content className="bg-white">
             {/* Depending on what tab of side nav is selected, the main content will change to its corresponding component */}
-            {keyIndex === '2' ? <Search /> : keyIndex === '5' ? <Settings /> : <Home />}
+            {keyIndex === '2' ? <SearchPage /> : keyIndex === '5' ? <Settings /> : <Home />}
           </Content>
         </Layout>
       </Layout>
