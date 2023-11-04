@@ -2,6 +2,7 @@ import { useState } from "react";
 import Home from "./components/Home";
 import Search from "./components/Search";
 import Settings from "./components/Settings";
+import CorporatePage from "./components/Corporate";
 import {
   SearchOutlined,
   HomeFilled,
@@ -25,7 +26,7 @@ const items = [
   getItem("Search", "2", <SearchOutlined />),
   // TO DO: When supabase is connected, make the following items appear if the user has permission for them (Ex: for Corporate user, item 4 should appear in nav)
   // getItem('Profile', '3', <UserOutlined />),
-  // getItem('Ads / Jobs', '4', <FolderOutlined />)
+  getItem('Ads / Jobs', '4', <FolderOutlined />),
   getItem("Settings", "5", <SettingOutlined />),
 ];
 
@@ -68,9 +69,9 @@ function App() {
               }}
             />
           </Sider>
-          <Content className="bg-white">
+          <Content className="bg-white max-h-screen overflow-scroll border-0">
             {/* Depending on what tab of side nav is selected, the main content will change to its corresponding component */}
-            {keyIndex === '2' ? <Search /> : keyIndex === '5' ? <Settings /> : <Home />}
+            {keyIndex === '2' ? <Search /> : keyIndex === '5' ? <Settings /> : keyIndex === '4' ? <CorporatePage /> : <Home />}
           </Content>
         </Layout>
       </Layout>
