@@ -14,13 +14,14 @@ function SearchPage () {
   return (
     <div className="h-full w-full flex justify-center items-center">
       <div className="w-8/12 h-full">
-        <Card className="w-full h-52 border border-slate-200 drop-shadow mt-7">
-          <div className="w-full h-full flex flex-col gap-10 justify-center">
+        <Card className="w-full h-fit border border-slate-200 drop-shadow mt-7">
+          <div className="w-full h-full flex flex-col gap-5 justify-center">
             <Search 
-              className="w-full h-24 resize-none"
+              className="w-full h-fit resize-none"
               placeholder="Search keywords"
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
+              size='large'
             />
             <div className="flex justify-between w-full">
             <Select 
@@ -33,15 +34,7 @@ function SearchPage () {
               <option value="images">Images</option>
               <option value="videos">Videos</option>
             </Select>
-
-            <Button 
-              className="px-5 bg-[#4096FF] text-white font-bold"
-              onClick={handleSearch}  
-            >
-              Search
-            </Button>
             </div>
-            
           </div>
         </Card>
       </div>
