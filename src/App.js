@@ -2,6 +2,7 @@ import { useState } from "react";
 import Home from "./components/Home";
 import Search from "./components/Search";
 import Settings from "./components/Settings";
+import Auth from "./components/Auth";
 import {
   SearchOutlined,
   HomeFilled,
@@ -53,6 +54,7 @@ const items = [
   // getItem('Profile', '3', <UserOutlined />),
   // getItem('Ads / Jobs', '4', <FolderOutlined />)
   getItem("Settings", "5", <SettingOutlined />),
+  getItem("Sign in", "6", <SettingOutlined />),
 ];
 
 
@@ -96,7 +98,7 @@ function App() {
           </Sider>
           <Content className="bg-white">
             {/* Depending on what tab of side nav is selected, the main content will change to its corresponding component */}
-            {keyIndex === '2' ? <Search /> : keyIndex === '5' ? <Settings /> : <Home />}
+            {keyIndex === '2' ? <Search /> : keyIndex === '5' ? <Settings /> : keyIndex === '6' ? <Auth /> : <Home />}
           </Content>
         </Layout>
       </Layout>
