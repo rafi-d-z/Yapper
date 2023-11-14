@@ -1,18 +1,15 @@
 import { Input, Card, Button } from "antd";
 import { FileImageFilled, PlayCircleFilled } from "@ant-design/icons";
 import { useEffect, useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
 
-const supabase = createClient('https://gopjsvqjoeoawvccsgax.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvcGpzdnFqb2VvYXd2Y2NzZ2F4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTY4OTQxNTQsImV4cCI6MjAxMjQ3MDE1NH0.1sT3E8bYnevWNP5VOpw7wExvzJa8SUSVm6AuFkL-BLQ')
-
+import supabase from "../config/supabaseClient"
 const { TextArea } = Input; 
 
 
 function Home() {
-const[fetchError, setFetchError] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState(""); // Added state to store the text input value
-
+  // This use Effect will fetch messages when the page loads, this will grab everything thats currently in the messages db and console log it for now
   useEffect(() => {
     const fetchMessages = async () => {
       const { data, error } = await supabase
@@ -24,13 +21,15 @@ const[fetchError, setFetchError] = useState(null);
     
       }
       if (data) {
+        console.log(data)
     
       }
     }
 
     fetchMessages();
   }, []);
-
+  // for now to be able to push new message into DB we need a userID, a message type and keywords.
+  // there are hard coded in for now but they will eventually have to be receved from the user 
   const handlePostClick = async () => {
     // Log the text input value
     console.log(newMessage);
