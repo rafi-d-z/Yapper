@@ -68,7 +68,7 @@ function App() {
               }}
             />
           </Sider>
-          <Content className="bg-white">
+          <Content className="bg-white max-h-screen overflow-scroll">
             {/* Depending on what tab of side nav is selected, the main content will change to its corresponding component */}
             {keyIndex === '2' ? <Search /> : keyIndex === '5' ? <Settings /> : <Home />}
           </Content>
