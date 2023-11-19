@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Home from "./components/Home";
-import Search from "./components/Search";
+import SearchPage from "./components/Search";
 import Settings from "./components/Settings";
 import Auth from "./components/Auth";
 import {
@@ -9,11 +9,11 @@ import {
   UserOutlined,
   FolderOutlined,
   SettingOutlined,
+  LoginOutlined,
 } from "@ant-design/icons";
 import { ConfigProvider, Layout, Menu } from "antd";
-import { createClient } from '@supabase/supabase-js'
+import { supabase } from "./utils/supabaseClient";
 
-const supabase = createClient('https://gopjsvqjoeoawvccsgax.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvcGpzdnFqb2VvYXd2Y2NzZ2F4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTY4OTQxNTQsImV4cCI6MjAxMjQ3MDE1NH0.1sT3E8bYnevWNP5VOpw7wExvzJa8SUSVm6AuFkL-BLQ')
 const { Content, Sider } = Layout;
 
 function getItem(label, key, icon, children) {
@@ -25,28 +25,6 @@ function getItem(label, key, icon, children) {
   };
 }
 
-export async function testSupabaseInsert() {
-  try {
-    const currentTime = new Date(); 
-    const formattedValue = `Current time : ${currentTime}`; 
-    const { data, error } = await supabase
-      .from('testing_table')
-      .insert([
-        { value: formattedValue }, 
-      ]);
-
-    if (error) {
-      console.error('Supabase insert error:', error);
-    } else {
-      console.log('Supabase insert successful:', data);
-    }
-  } catch (error) {
-    console.error('An error occurred:', error);
-  }
-}
-
-
-
 const items = [
   getItem("Home", "1", <HomeFilled />),
   getItem("Search", "2", <SearchOutlined />),
@@ -54,7 +32,7 @@ const items = [
   // getItem('Profile', '3', <UserOutlined />),
   // getItem('Ads / Jobs', '4', <FolderOutlined />)
   getItem("Settings", "5", <SettingOutlined />),
-  getItem("Sign in", "6", <SettingOutlined />),
+  getItem("Sign in", "6", <LoginOutlined />),
 ];
 
 
@@ -98,7 +76,7 @@ function App() {
           </Sider>
           <Content className="bg-white">
             {/* Depending on what tab of side nav is selected, the main content will change to its corresponding component */}
-            {keyIndex === '2' ? <Search /> : keyIndex === '5' ? <Settings /> : keyIndex === '6' ? <Auth /> : <Home />}
+            {keyIndex === '2' ? <SearchPage /> : keyIndex === '5' ? <Settings /> : keyIndex === '6' ? <Auth />: <Home />}
           </Content>
         </Layout>
       </Layout>
