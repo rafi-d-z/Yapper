@@ -2,6 +2,7 @@ import { useState } from "react";
 import Home from "./components/Home";
 import SearchPage from "./components/Search";
 import Settings from "./components/Settings";
+import Auth from "./components/Auth";
 import Profile from "./components/Profile";
 import {
   SearchOutlined,
@@ -9,8 +10,11 @@ import {
   UserOutlined,
   FolderOutlined,
   SettingOutlined,
+  LoginOutlined,
 } from "@ant-design/icons";
 import { ConfigProvider, Layout, Menu } from "antd";
+import { supabase } from "./utils/supabaseClient";
+
 const { Content, Sider } = Layout;
 
 function getItem(label, key, icon, children) {
@@ -21,6 +25,7 @@ function getItem(label, key, icon, children) {
     label,
   };
 }
+
 const items = [
   getItem("Home", "1", <HomeFilled />),
   getItem("Search", "2", <SearchOutlined />),
@@ -28,6 +33,7 @@ const items = [
   getItem('Profile', '3', <UserOutlined />),
   // getItem('Ads / Jobs', '4', <FolderOutlined />)
   getItem("Settings", "5", <SettingOutlined />),
+  getItem("Sign in", "6", <LoginOutlined />),
 ];
 
 
@@ -71,7 +77,7 @@ function App() {
           </Sider>
           <Content className="bg-white">
             {/* Depending on what tab of side nav is selected, the main content will change to its corresponding component */}
-            {keyIndex === '2' ? <SearchPage /> : keyIndex==='3' ? <Profile/> :keyIndex === '5' ? <Settings /> : <Home />}
+            {keyIndex === '2' ? <SearchPage /> : keyIndex === '5' ? <Settings /> : keyIndex === '6' ? <Auth />: <Home />}
           </Content>
         </Layout>
       </Layout>
