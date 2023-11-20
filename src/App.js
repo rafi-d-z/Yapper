@@ -3,6 +3,7 @@ import Home from "./components/Home";
 import SearchPage from "./components/Search";
 import Settings from "./components/Settings";
 import Auth from "./components/Auth";
+import Profile from "./components/Profile";
 import {
   SearchOutlined,
   HomeFilled,
@@ -29,7 +30,7 @@ const items = [
   getItem("Home", "1", <HomeFilled />),
   getItem("Search", "2", <SearchOutlined />),
   // TO DO: When supabase is connected, make the following items appear if the user has permission for them (Ex: for Corporate user, item 4 should appear in nav)
-  // getItem('Profile', '3', <UserOutlined />),
+  getItem('Profile', '3', <UserOutlined />),
   // getItem('Ads / Jobs', '4', <FolderOutlined />)
   getItem("Settings", "5", <SettingOutlined />),
   getItem("Sign in", "6", <LoginOutlined />),
