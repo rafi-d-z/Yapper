@@ -1,71 +1,231 @@
-import { Input, Card, Button } from "antd";
-import { FileImageFilled, PlayCircleFilled } from "@ant-design/icons";
-import { useEffect, useState } from 'react'
-
+import { Input, Card, Button, Image, Upload, Dropdown, Badge } from "antd";
+import {
+  FileImageFilled,
+  PlayCircleFilled,
+  PictureOutlined,
+  FileGifOutlined,
+  DownOutlined,
+  SendOutlined,
+  ClockCircleOutlined,
+  ClockCircleFilled,
+} from "@ant-design/icons";
+import { useEffect, useState } from "react";
 import { supabase } from "../utils/supabaseClient";
+import Profile from "./Profile";
+import Post from "./Post";
+import User from "./User";
+import getItem from "../utils/helper_functions";
 
-const { TextArea } = Input; 
-
+const { TextArea } = Input;
 
 function Home() {
-  const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState(""); // Added state to store the text input value
+  const [topThreePosts, setTopThreePosts] = useState([]); // Added state to store the top three messages
+  const [topThreeUsers, setTopThreeUsers] = useState([]); // Added state to store the top three followed users
+
+  // props for upload for messages
+  const props = {
+    beforeUpload: (file) => {
+      const isPNG = file.type === "image/png";
+      if (!isPNG) {
+        // message.error(`${file.name} is not a png file`);
+      }
+      return isPNG || Upload.LIST_IGNORE;
+    },
+    onChange: (info) => {
+      console.log(info.fileList);
+    },
+  };
+
+  const GIFprops = {
+    beforeUpload: (file) => {
+      // TO DO: check if this logic is correct bc pretty sure its not
+      const isGIF = file.type === "image/gif";
+      if (!isGIF) {
+        // message.error(`${file.name} is not a GIF file`);
+      }
+      return isGIF || Upload.LIST_IGNORE;
+    },
+    onChange: (info) => {
+      console.log(info.fileList);
+    },
+  };
+  // items for dropdown on post creation button
+  const items = [
+    getItem(
+      "Schedule Send",
+      "schedule",
+      <Badge
+        offset={[0, 12]}
+        count={
+          <ClockCircleOutlined className="text-[#4096FF] text-xs overflow-hidden font-bold" />
+        }
+      >
+        <SendOutlined className="text-[#4096FF] text-sm overflow-hidden" />
+      </Badge>
+    ),
+  ];
+  // following functions are for getting the top 3 of messages and user data
+  const getTopThreePosts = (data) => {
+    data.forEach((obj) => {
+      obj.difference = obj.likes - obj.dislikes;
+    });
+    // Sort the objects based on the difference in descending order
+    data.sort((a, b) => b.difference - a.difference);
+    // Get the top 3 objects with the highest differences
+    const top3 = data.slice(0, 3);
+    setTopThreePosts(top3);
+  };
+  const getTopThreeUsers = (data) => {
+    // TO DO: Will have to change in the future for actual requirements of Trendy User
+    data.forEach((obj) => {
+      obj.difference = obj.total_likes - obj.total_dislikes;
+    });
+    // Sort the objects based on the difference in descending order
+    data.sort((a, b) => b.difference - a.difference);
+    // Get the top 3 objects with the highest differences
+    const top3 = data.slice(0, 3);
+    setTopThreeUsers(top3);
+  };
+
   // This use Effect will fetch messages when the page loads, this will grab everything thats currently in the messages db and console log it for now
   useEffect(() => {
     const fetchMessages = async () => {
-      const { data, error } = await supabase
-        .from('message')
-        .select();
+      try {
+        const { data, error } = await supabase.from("message").select();
 
-      if (error) {
-        console.log(error)
-    
+        if (error) {
+          throw error;
+        } else if (data) {
+          getTopThreePosts(data);
+        }
+      } catch (error) {
+        console.log(error);
       }
-      if (data) {
-        console.log(data)
-    
+    };
+    const fetchUsers = async () => {
+      try {
+        const { data, error } = await supabase.from("user").select();
+        if (error) {
+          throw error;
+        } else if (data) {
+          getTopThreeUsers(data);
+        }
+      } catch (error) {
+        console.log(error);
       }
-    }
+    };
 
     fetchMessages();
+    fetchUsers();
   }, []);
   // for now to be able to push new message into DB we need a userID, a message type and keywords.
-  // there are hard coded in for now but they will eventually have to be receved from the user 
+  // there are hard coded in for now but they will eventually have to be receved from the user
   const handlePostClick = async () => {
     // Log the text input value
     console.log(newMessage);
-     const { data, error } = await supabase
-       .from('message')
-       .insert([
-         { user_id: '9bbe2db9-65b0-4f56-b0cd-1fb808beb764',
-            message_content: newMessage,
-            message_type: "message",
-            keywords: "test"
-        
-         },
-       ]);
+    const { data, error } = await supabase.from("message").insert([
+      {
+        user_id: "9bbe2db9-65b0-4f56-b0cd-1fb808beb764",
+        message_content: newMessage,
+        message_type: "message",
+        keywords: "test",
+      },
+    ]);
 
     // Clear the input field
     setNewMessage("");
-  }
+  };
 
-    return (
-        <div className="h-full w-full flex justify-center items-center">
-            <div className="w-8/12 h-full">
-                <Card className="w-full h-52 border border-slate-200 drop-shadow mt-7">
-                <div className="w-full h-full flex flex-col gap-10 justify-center">
-                    <TextArea className="w-full h-24 resize-none" placeholder="Whats happening?..." showCount maxLength={100} value={newMessage} onChange={(e) => setNewMessage(e.target.value)} />
-                    <div className="flex justify-between w-full">
-                    <div className="flex w-2/12 gap-2">
-                        <Button className="border-none" icon={<FileImageFilled />} />
-                        <Button className="border-none" icon={<PlayCircleFilled />} />
-                    </div>
-                    <Button className="px-5 bg-[#4096FF] text-white font-bold" onClick={handlePostClick}>Post</Button>
-                    </div>
-                </div>
-                </Card>
-            </div>
+  return (
+    <div className="min-h-[80vh] w-full flex justify-center">
+      <div className="h-full mt-5 w-full flex justify-around">
+        {/* left side (profile) */}
+        <div className="w-3/12 h-fit bg-white rounded-2xl">
+          <Profile />
         </div>
-    )
+        {/* middle section (messages + create messages) */}
+        <div className="w-5/12 max-h-[85vh] pr-3 overflow-y-scroll rounded-2xl">
+          {/* {user !== null ? <div></div> : <div />} */}
+          <div className="flex flex-col gap-5">
+            <div className="flex flex-col justify-between py-4 items-center bg-white rounded-2xl h-32">
+              <div className="flex justify-between w-11/12 gap-2">
+                <Image
+                  height={45}
+                  width={45}
+                  className="rounded-full"
+                  preview={false}
+                  src="https://i.pinimg.com/originals/d8/f5/2c/d8f52ce52985768ccac65f9550baf49e.jpg"
+                />
+                <Input
+                  className="w-11/12"
+                  placeholder="What do you want to share?"
+                />
+              </div>
+              <div className="flex justify-between w-11/12">
+                <div className="flex justify-between w-3/12">
+                  <Upload {...props}>
+                    <Button
+                      className="border-none shadow-none"
+                      icon={<PictureOutlined />}
+                    >
+                      Photo
+                    </Button>
+                  </Upload>
+                  <Upload {...GIFprops}>
+                    <Button
+                      className="border-none shadow-none"
+                      icon={<FileGifOutlined />}
+                    >
+                      GIF
+                    </Button>
+                  </Upload>
+                </div>
+                <div className="w-fit">
+                  <Dropdown.Button
+                    icon={<DownOutlined />}
+                    size="small"
+                    menu={{ items }}
+                  >
+                    Submit
+                  </Dropdown.Button>
+                </div>
+              </div>
+            </div>
+            {/* where messages will go */}
+            {topThreePosts.map((post) => {
+              console.log(topThreePosts);
+              return (
+                <div className="w-full h-48 min-h-full bg-white rounded-2xl">
+                  <Post
+                    message={post.message_content}
+                    likes={post.likes}
+                    dislikes={post.dislikes}
+                    pid={post.id}
+                    uuid={post.user_id}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        {/* right section (top followed users + ads) */}
+        <div className="w-3/12 flex flex-col gap-5 h-fit px-4 py-5 bg-white rounded-2xl">
+          <p className="text-xl font-bold">Top Followed Users</p>
+          <div className="flex w-full flex-col gap-5">
+            {topThreeUsers.map((user) => {
+              return (
+                <User
+                  uuid={user.id}
+                  username={user.user_name}
+                  subscribers={user.subscribers}
+                />
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 export default Home;
