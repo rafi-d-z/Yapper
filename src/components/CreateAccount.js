@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { Button, Modal, Select } from "antd";
+import { Button, Modal, Select, Input } from "antd";
 import { supabase } from "../utils/supabaseClient";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 const CreateAccount = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -56,7 +56,7 @@ const CreateAccount = () => {
       console.log(data);
       userID = data.user.id;
       insertUserType();
-      navigate('/')
+      navigate("/");
     }
 
     console.log("Email: ", email);
@@ -71,19 +71,6 @@ const CreateAccount = () => {
     setFilter("");
   };
 
-  const UserSelection = () => (
-    <>
-      <Select
-        className="flex w-8/12 gap-2"
-        defaultValue="ordinary"
-        onChange={(value) => setFilter(value)}
-      >
-        <option value="ordinary">Ordinary</option>
-        <option value="corporate">Corporate</option>
-      </Select>
-    </>
-  );
-
   const showModal = () => {
     setIsModalOpen(true);
   };
@@ -95,52 +82,61 @@ const CreateAccount = () => {
   };
 
   return (
-    <>
+    <div className="w-full h-full">
       <button
-        className="w-2/12 h-8 bg-[#4096FF] text-white font-bold border-slate-200"
+        className="w-full h-10 bg-[#4096FF] rounded-lg text-white font-bold border-slate-200"
         onClick={showModal}
       >
         Create Account
       </button>
       <Modal
         title="Create your account"
-        className="w-full h-full flex flex-col items-center justify-center"
+        className="flex flex-col items-center justify-center"
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
+        footer={null}
       >
-        <div className="w-full h-full flex flex-col gap-4 justify-center border-slate-200 drop-shadow items-center">
-          <input
+        <div className="w-full h-full flex flex-col gap-4 justify-center border-slate-200 items-center">
+          <Input
             className="w-11/12 h-10 px-2"
             type="text"
             placeholder="Username"
             value={username}
             onChange={handleUsernameChange}
           />
-          <input
+          <Input
             className="w-11/12 h-10 px-2"
             type="text"
             placeholder="Email"
             value={email}
             onChange={handleEmailChange}
           />
-          <input
+          <Input
             className="w-11/12 h-10 px-2"
             type="text"
             placeholder="Password"
             value={password}
             onChange={handlePasswordChange}
           />
+          <div className="w-11/12">
+            <Select
+              className="flex w-6/12 gap-2"
+              defaultValue="ordinary"
+              onChange={(value) => setFilter(value)}
+            >
+              <option value="ordinary">Ordinary</option>
+              <option value="corporate">Corporate</option>
+            </Select>
+          </div>
+          <Button
+            className="w-11/12 h-10 bg-[#52C41A] text-white font-bold mx-auto"
+            onClick={handleCreateAccount}
+          >
+            Sign Up
+          </Button>
         </div>
-        <UserSelection />
-        <button
-          className="w-11/12 h-8 bg-[#52C41A] text-white font-bold"
-          style={{ marginTop: "20px" }}
-          onClick={handleCreateAccount}
-        >
-          Sign Up
-        </button>
-        <p className="text-[#858585] font-normal">
+        <p className="w-11/12 text-center text-[#858585] text-xs font-normal mx-auto">
           By clicking signing up, you agree to the
           <a href="https://twitter.com/en/tos" className="underline">
             {" "}
@@ -161,7 +157,7 @@ const CreateAccount = () => {
           </a>
         </p>
       </Modal>
-    </>
+    </div>
   );
 };
 
