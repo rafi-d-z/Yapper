@@ -6,6 +6,7 @@ import {
   DislikeOutlined,
   MoneyCollectOutlined,
   ExclamationCircleOutlined,
+  CommentOutlined
 } from "@ant-design/icons";
 import { Image, Badge, Dropdown } from "antd";
 import getItem from "../utils/helper_functions";
@@ -92,6 +93,10 @@ function Post(props) {
         <div className="flex gap-1 items-center">
           <MoneyCollectOutlined className="text-xl text-[#FADB14]" />
           <p className="text-sm font-bold text-[#FADB14]">Tip</p>
+        </div>
+        <div className="flex gap-1 items-center">
+        <CommentOutlined className="text-xl text-[#8C8C8C]"/>
+        <p className="text-sm font-bold text-[#8C8C8C]">Comment</p>
         </div>
       </div>
     </div>
