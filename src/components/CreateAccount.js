@@ -29,6 +29,21 @@ const CreateAccount = () => {
       console.error("An error occurred:", error);
     }
   }
+  async function signIn(){
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+      })
+      if (error){
+        console.error(error)
+      } else {
+        navigate("/");
+      }
+    } catch (error){
+      console.log(error);
+    }
+  }
 
   // Define functions to handle input changes
   const handleEmailChange = (e) => {
@@ -53,10 +68,19 @@ const CreateAccount = () => {
       console.log(error);
     }
     if (data) {
-      console.log(data);
-      userID = data.user.id;
-      insertUserType();
-      navigate("/");
+      // weird trick that if identities == 0 then that means account already exists
+      if(data.user.identities.length > 0){
+        userID = data.user.id;
+        insertUserType();
+        // sign in
+        signIn();
+      } else {
+        // this means account already exists
+        console.log('account already exists')
+      }
+      // console.log(data);
+      // userID = data.user.id;
+      // insertUserType();
     }
 
     console.log("Email: ", email);
@@ -112,7 +136,7 @@ const CreateAccount = () => {
             value={email}
             onChange={handleEmailChange}
           />
-          <Input
+          <Input.Password
             className="w-11/12 h-10 px-2"
             type="text"
             placeholder="Password"

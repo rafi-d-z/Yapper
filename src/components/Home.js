@@ -194,7 +194,6 @@ function Home() {
             </div>
             {/* where messages will go */}
             {topThreePosts.map((post) => {
-              console.log(topThreePosts);
               return (
                 <div className="w-full h-48 min-h-full bg-white rounded-2xl">
                   <Post

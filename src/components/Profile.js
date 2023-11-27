@@ -1,6 +1,7 @@
 import { LikeOutlined, DislikeOutlined } from "@ant-design/icons";
 import { Avatar, Button, Card } from "antd";
 import { useSession } from "@supabase/auth-helpers-react";
+import { supabase } from "../utils/supabaseClient";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
@@ -8,15 +9,30 @@ const { Meta } = Card;
 
 function Profile() {
   const [user, setUser] = useState(null);
-  const session = useSession();
+  const [session, setSession] = useState(null);
+  // setLoading(false);
+  // const session = useSession();
   const pfp =
     "https://i.pinimg.com/originals/d8/f5/2c/d8f52ce52985768ccac65f9550baf49e.jpg";
 
   useEffect(() => {
-    if (session) {
-      console.log(session);
-      console.log("user is signed in");
-    }
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+      setUser(session?.user ?? null);
+      console.log(session?.user)
+      // setLoading(false);
+    })
+    // Listen for changes on auth state (logged in, signed out, etc.)
+    supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+       setUser(session?.user ?? null);
+      // setLoading(false);
+    })
+    // console.log(session);
+    // if (session) {
+    //   console.log(session);
+    //   setUser(session.user);
+    // }
   }, []);
 
   return user ? (
