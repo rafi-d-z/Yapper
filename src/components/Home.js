@@ -22,7 +22,7 @@ function Home() {
   const [newMessage, setNewMessage] = useState(""); // Added state to store the text input value
   const [topThreePosts, setTopThreePosts] = useState([]); // Added state to store the top three messages
   const [topThreeUsers, setTopThreeUsers] = useState([]); // Added state to store the top three followed users
-
+  const [newKeywords, setKeywords] = useState([]);
   // props for upload for messages
   const props = {
     beforeUpload: (file) => {
@@ -121,20 +121,39 @@ function Home() {
   }, []);
   // for now to be able to push new message into DB we need a userID, a message type and keywords.
   // there are hard coded in for now but they will eventually have to be receved from the user
+  // we will need more logic here, before we make the inset call we have to check if we have enough balance
+  // so handle post clikc with both have to already know our users balance, then calculate if it has enough to post
+  // if it doesnt have enough reroute to balance page
+  // if it haves enough make the post but also dedcut from account
   const handlePostClick = async () => {
     // Log the text input value
-    console.log(newMessage);
+    //console.log(newMessage);
+    const keyWordList = newKeywords.split(",").map((keyword) => keyword.trim())
     const { data, error } = await supabase.from("message").insert([
       {
         user_id: "9bbe2db9-65b0-4f56-b0cd-1fb808beb764",
         message_content: newMessage,
         message_type: "message",
-        keywords: "test",
+        keywords: keyWordList,
       },
     ]);
 
     // Clear the input field
     setNewMessage("");
+    setKeywords("");
+  };
+
+  const handleInputChange  = (e) => {
+    const value = e.target.value;
+    setNewMessage(value);
+
+  };
+  const handleKeywordsChange = (e) => {
+    const value = e.target.value;
+    // Split the input into an array of keywords (assuming they are comma-separated)
+    const keywordsArray = value
+    //console.log(keywordsArray.split(",").map((keyword) => keyword.trim()))
+    setKeywords(keywordsArray)
   };
 
   return (
@@ -148,7 +167,7 @@ function Home() {
         <div className="w-5/12 max-h-[85vh] pr-3 overflow-y-scroll rounded-2xl">
           {/* {user !== null ? <div></div> : <div />} */}
           <div className="flex flex-col gap-5">
-            <div className="flex flex-col justify-between py-4 items-center bg-white rounded-2xl h-32">
+            <div className="flex flex-col justify-between py-4 items-center bg-white rounded-2xl h-33">
               <div className="flex justify-between w-11/12 gap-2">
                 <Image
                   height={45}
@@ -160,8 +179,25 @@ function Home() {
                 <Input
                   className="w-11/12"
                   placeholder="What do you want to share?"
+                  value={newMessage}
+                  onChange={handleInputChange}
+                  
                 />
+                
               </div>
+
+              <div className="flex justify-between py-2 w-11/12 gap-2 ">
+                <p className="justify-center pt-1">Keywords:</p>
+                <Input
+                  className="w-11/12"
+                  placeholder="Keywords: Fun, Operating Systems, Advanced FSM "
+                  value={newKeywords}
+                  onChange={handleKeywordsChange} // This will need to fire with the message above
+                  
+                />
+                
+              </div>
+
               <div className="flex justify-between w-11/12">
                 <div className="flex justify-between w-3/12">
                   <Upload {...props}>
@@ -186,6 +222,7 @@ function Home() {
                     icon={<DownOutlined />}
                     size="small"
                     menu={{ items }}
+                    onClick={handlePostClick}
                   >
                     Submit
                   </Dropdown.Button>
@@ -194,7 +231,7 @@ function Home() {
             </div>
             {/* where messages will go */}
             {topThreePosts.map((post) => {
-              console.log(topThreePosts);
+              //console.log(topThreePosts);
               return (
                 <div className="w-full h-48 min-h-full bg-white rounded-2xl">
                   <Post
