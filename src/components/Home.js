@@ -23,6 +23,9 @@ function Home() {
   const [topThreePosts, setTopThreePosts] = useState([]); // Added state to store the top three messages
   const [topThreeUsers, setTopThreeUsers] = useState([]); // Added state to store the top three followed users
   const [newKeywords, setKeywords] = useState([]);
+  const [newBalance, setBalance] = useState(0);
+  // temp usuage
+  const userId = "ed99729e-5d06-4717-8c8c-ada2f9df8df4"
   // props for upload for messages
   const props = {
     beforeUpload: (file) => {
@@ -116,32 +119,84 @@ function Home() {
       }
     };
 
+    // Fetches the users balance based on userId at the top, sets it to new balance
+    const fetchBalance = async () => {
+      try {
+        const { data, error } = await supabase
+        .from('user')
+        .select('account_balance')
+        .eq('id', userId);
+        if (error) {
+          throw error;
+        } else if (data) {
+          setBalance(data[0].account_balance)
+    
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
     fetchMessages();
     fetchUsers();
+    fetchBalance();
   }, []);
-  // for now to be able to push new message into DB we need a userID, a message type and keywords.
-  // there are hard coded in for now but they will eventually have to be receved from the user
-  // we will need more logic here, before we make the inset call we have to check if we have enough balance
-  // so handle post clikc with both have to already know our users balance, then calculate if it has enough to post
-  // if it doesnt have enough reroute to balance page
-  // if it haves enough make the post but also dedcut from account
+  
+  // Handle post click, will first check the price of the message, then compare it to its balance
+  // thats init at the beginning
+  // if theres enough balance then it would post the message and update the users balance
+  // as well as update the state variable so that the app also has the current balance
+
   const handlePostClick = async () => {
-    // Log the text input value
-    //console.log(newMessage);
-    const keyWordList = newKeywords.split(",").map((keyword) => keyword.trim())
-    const { data, error } = await supabase.from("message").insert([
-      {
-        user_id: "9bbe2db9-65b0-4f56-b0cd-1fb808beb764",
-        message_content: newMessage,
-        message_type: "message",
-        keywords: keyWordList,
-      },
-    ]);
+    console.log(newBalance)
+    try{
+      const message_total = (newMessage.split(' ').join('').length * 0.1).toFixed(2)
+
+      if (newBalance- message_total > 0){
+
+        const keyWordList = newKeywords.split(",").map((keyword) => keyword.trim())
+        const { data: insertData, error: insertError } = await supabase
+          .from("message")
+          .insert([
+            {
+              user_id: userId,
+              message_content: newMessage,
+              message_type: "message",
+              keywords: keyWordList,
+            },
+
+
+          ]);
+          if (insertError) {
+            throw insertError;
+          } 
+
+        const {data: updateData, data: updatError} = await supabase
+          .from('user')
+          .update({ account_balance: (newBalance - message_total).toFixed(2) })
+          .eq('id', userId);
+          if (updatError) {
+            throw updatError;
+          } 
+          else  {
+            setBalance((newBalance - message_total).toFixed(2))
+          }
+          
+    }
+      // If insufficent reroute, for now it warns the user
+      else {
+        alert('Warning: Insufficent Balance ')
+
+      }
 
     // Clear the input field
     setNewMessage("");
     setKeywords("");
-  };
+    }
+    catch (error) {
+      console.log(error)
+    }
+    };
 
   const handleInputChange  = (e) => {
     const value = e.target.value;
