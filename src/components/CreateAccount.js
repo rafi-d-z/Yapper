@@ -69,7 +69,9 @@ const CreateAccount = () => {
     }
     if (data) {
       // weird trick that if identities == 0 then that means account already exists
-      if(data.user.identities.length > 0){
+      // TODO: when user puts password, under 6 characters, it gives error so have to make UI aspect of it
+      console.log(data)
+      if(data.user.identities?.length > 0){
         userID = data.user.id;
         insertUserType();
         // sign in
@@ -78,16 +80,7 @@ const CreateAccount = () => {
         // this means account already exists
         console.log('account already exists')
       }
-      // console.log(data);
-      // userID = data.user.id;
-      // insertUserType();
     }
-
-    console.log("Email: ", email);
-    console.log("Password: ", password);
-    console.log("UserName: ", username);
-    console.log(filter);
-    console.log("User ID: ", userID);
 
     setEmail("");
     setPassword("");

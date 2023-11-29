@@ -1,27 +1,24 @@
-import { Input, Card, Button, Image, Upload, Dropdown, Badge } from "antd";
+import { Input, Button, Image, Upload, Dropdown, Badge } from "antd";
 import {
-  FileImageFilled,
-  PlayCircleFilled,
   PictureOutlined,
   FileGifOutlined,
   DownOutlined,
   SendOutlined,
   ClockCircleOutlined,
-  ClockCircleFilled,
 } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { supabase } from "../utils/supabaseClient";
 import Profile from "./Profile";
 import Post from "./Post";
 import User from "./User";
-import getItem from "../utils/helper_functions";
-
-const { TextArea } = Input;
+import { getItem } from "../utils/helper_functions";
 
 function Home() {
   const [newMessage, setNewMessage] = useState(""); // Added state to store the text input value
   const [topThreePosts, setTopThreePosts] = useState([]); // Added state to store the top three messages
   const [topThreeUsers, setTopThreeUsers] = useState([]); // Added state to store the top three followed users
+  const [session, setSession] = useState(null);
+  const [user, setUser] = useState(null);
 
   // props for upload for messages
   const props = {
@@ -88,6 +85,26 @@ function Home() {
     setTopThreeUsers(top3);
   };
 
+  // Redundant code used in other components
+  // TODO: put this code in helper_functions.js to reduce overall code and readability
+  const getUser = async (user_id) => {
+    try {
+      const { data, error } = await supabase
+        .from("user")
+        .select()
+        .eq("id", user_id);
+      if (error) {
+        throw error;
+      } else if (data) {
+        setUser(data[0]);
+      } else {
+        console.log("found nothing");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   // This use Effect will fetch messages when the page loads, this will grab everything thats currently in the messages db and console log it for now
   useEffect(() => {
     const fetchMessages = async () => {
@@ -116,8 +133,19 @@ function Home() {
       }
     };
 
+    // Redundant code used in other components
+    // TODO: put this code in helper_functions.js to reduce overall code and readability
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session?.user) {
+        getUser(session?.user.id);
+      }
+      setUser(session?.user ?? null);
+    });
+
     fetchMessages();
     fetchUsers();
+    setUser(getUser());
   }, []);
   // for now to be able to push new message into DB we need a userID, a message type and keywords.
   // there are hard coded in for now but they will eventually have to be receved from the user
@@ -148,14 +176,14 @@ function Home() {
         <div className="w-5/12 max-h-[85vh] pr-3 overflow-y-scroll rounded-2xl">
           {/* {user !== null ? <div></div> : <div />} */}
           <div className="flex flex-col gap-5">
-            <div className="flex flex-col justify-between py-4 items-center bg-white rounded-2xl h-32">
+            {user !== null ? <div className="flex flex-col justify-between py-4 items-center bg-white rounded-2xl h-32">
               <div className="flex justify-between w-11/12 gap-2">
                 <Image
                   height={45}
                   width={45}
                   className="rounded-full"
                   preview={false}
-                  src="https://i.pinimg.com/originals/d8/f5/2c/d8f52ce52985768ccac65f9550baf49e.jpg"
+                  src={user.avatar_url}
                 />
                 <Input
                   className="w-11/12"
@@ -191,7 +219,7 @@ function Home() {
                   </Dropdown.Button>
                 </div>
               </div>
-            </div>
+            </div> : <></>}
             {/* where messages will go */}
             {topThreePosts.map((post) => {
               return (
@@ -218,6 +246,7 @@ function Home() {
                   uuid={user.id}
                   username={user.user_name}
                   subscribers={user.subscribers}
+                  avatar={user.avatar_url}
                 />
               );
             })}
