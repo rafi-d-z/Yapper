@@ -104,6 +104,7 @@ function Post(props) {
         >
           <CommentOutlined className="text-xl" />
           <p className="text-sm font-bold">Comments</p>
+        </Badge>
       </div>
     </div>
   );
