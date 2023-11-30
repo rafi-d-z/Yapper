@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
-import { Input, Button, Alert, notification } from "antd";
-import { createClient } from "@supabase/supabase-js";
+import { Input, Button, notification, Form } from "antd";
 import CreateAccount from "../components/CreateAccount";
 import { supabase } from "../utils/supabaseClient";
 import { useNavigate } from "react-router-dom";
+import { MailOutlined, LockOutlined } from "@ant-design/icons";
 // Import the `testSupabaseInsert` function here
 
 const Context = React.createContext({ name: 'Default' });
@@ -52,6 +52,7 @@ function Auth() {
     }
   };
 
+  // TODO: Figure this out
   const handlePasswordReset = async () => {
     const { data, error } = await supabase.auth.resetPasswordForEmail(email);
 
@@ -78,39 +79,51 @@ function Auth() {
       {/* Right Container */}
       <div className="w-7/12 h-full min-h-screen flex flex-col items-center justify-center">
         <div className="w-6/12 h-fit bg-white flex flex-col py-5 gap-3 items-center rounded-lg">
-          <div className="w-11/12 h-full flex flex-col gap-4 justify-center border-slate-200 items-center">
-            <Input
-              className="w-full h-10 px-2"
-              type="text"
-              placeholder="Email Address"
-              value={email}
-              onChange={handleEmailChange}
-            />
-            <Input.Password
-              className="w-full h-10 px-2"
-              type="pass"
-              placeholder="Password"
-              value={password}
-              onChange={handlePasswordChange}
-            />
-            <div className="flex flex-col gap-3 w-full text-center">
-              <Button
-                className="w-full h-10 bg-[#52C41A] text-white text-lg font-bold"
-                onClick={handleLogin}
-              >
-                Login
-              </Button>
-              <a
-                href="#"
-                onClick={handlePasswordReset}
-                className="text-[#776BFF] text-sm font-italic cursor-pointer"
-              >
-                Forgot Password?
-              </a>
+          <Form className="w-11/12 h-full flex flex-col gap-4 justify-center border-slate-200 items-center" onFinish={handleLogin}>
+            <Form.Item className="w-full h-full mb-2" name="email" rules={[{ required: true, message: 'Please input your email!' }]}>
+              <Input
+                className="w-full h-10 px-2"
+                type="text"
+                placeholder="Email Address"
+                value={email}
+                prefix={<MailOutlined className="mr-2 text-lg text-[#7C7C7C]" />}
+                onChange={handleEmailChange}
+              />
+            </Form.Item>
+            <Form.Item className="w-full h-full mb-2" name="password" rules={[{ required: true, message: 'Please input your password!' }]}>
+              <Input.Password
+                className="w-full h-10 px-2"
+                type="pass"
+                placeholder="Password"
+                value={password}
+                prefix={<LockOutlined className="mr-2 text-lg text-[#7C7C7C]" />}
+                onChange={handlePasswordChange}
+              />
+            </Form.Item>
+            <Form.Item className="w-full h-full mb-0">
+              <div className="flex flex-col gap-3 w-full text-center">
+                <Button
+                  className="w-full h-10 bg-[#52C41A] text-white text-lg font-bold"
+                  // onClick={handleLogin}
+                  htmlType="submit"
+                >
+                  Login
+                </Button>
+            
+                <a
+                  href="#"
+                  onClick={handlePasswordReset}
+                  className="text-[#776BFF] text-sm font-italic cursor-pointer"
+                >
+                  Forgot Password?
+                </a>
+              </div>
+            </Form.Item>
+            </Form>
+            <div className="w-11/12 h-full flex flex-col gap-4 justify-center">
+              <hr className="w-full"  />
+              <CreateAccount />
             </div>
-            <hr className="w-full"  />
-            <CreateAccount />
-          </div>
         </div>
         <p className="w-6/12 text-center text-[#858585] text-xs mt-2">
           By signing up, you agree to the

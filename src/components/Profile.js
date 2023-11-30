@@ -73,7 +73,7 @@ function Profile() {
         {/* TO DO: Make text stay white when hovering */}
         <Link className="w-10/12" to={"/auth"}>
           <Button className="w-full bg-[#44D65B] text-white hover:text-white font-bold">
-            Sign in
+            Sign up
           </Button>
         </Link>
       </div>
