@@ -1,15 +1,29 @@
-import React, { useState } from "react";
-import { Input, Button } from "antd";
+import React, { useEffect, useState, useRef, useMemo } from "react";
+import { Input, Button, Alert, notification } from "antd";
 import { createClient } from "@supabase/supabase-js";
 import CreateAccount from "../components/CreateAccount";
 import { supabase } from "../utils/supabaseClient";
 import { useNavigate } from "react-router-dom";
 // Import the `testSupabaseInsert` function here
 
+const Context = React.createContext({ name: 'Default' });
 function Auth() {
   // User logging In :
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  // variables for error notification
+  const [api, contextHolder] = notification.useNotification();
+  const openNotificationRef = useRef();
+  const contextValue = useMemo(() => ({ name: 'Yapper' }));
+
+  useEffect(() => {
+    openNotificationRef.current = (message) => {
+      api.error({
+        message: `${message}`,
+        placement: 'top'
+      });
+    };
+  }, [api]);
 
   // routing navigate function
   const navigate = useNavigate();
@@ -25,22 +39,17 @@ function Auth() {
 
   // Define a function to handle the login button click
   const handleLogin = async () => {
-    console.log("Email: ", email);
-    console.log("Password: ", password);
-
     const { data, error } = await supabase.auth.signInWithPassword({
       email: email,
       password: password,
     });
     if (error) {
-      console.log(error);
-    }
-    if (data) {
-      console.log(data);
+      openNotificationRef.current('Invalid email or password')
+    } else if (data) {
+      setEmail("");
+      setPassword("");
       navigate("/");
     }
-    setEmail("");
-    setPassword("");
   };
 
   const handlePasswordReset = async () => {
@@ -55,6 +64,8 @@ function Auth() {
   };
 
   return (
+  <Context.Provider value={contextValue}>
+    {contextHolder}
     <div className="w-full h-full min-h-screen flex items-center bg-[#f5f5f5]">
       {/* Left Container */}
       <div className="w-5/12 flex flex-col items-center justify-center gap-4">
@@ -75,9 +86,9 @@ function Auth() {
               value={email}
               onChange={handleEmailChange}
             />
-            <Input
+            <Input.Password
               className="w-full h-10 px-2"
-              type="text"
+              type="pass"
               placeholder="Password"
               value={password}
               onChange={handlePasswordChange}
@@ -123,6 +134,7 @@ function Auth() {
         </p>
       </div>
     </div>
+  </Context.Provider>
   );
 }
 

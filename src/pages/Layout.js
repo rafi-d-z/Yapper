@@ -7,6 +7,7 @@ import {
   HomeFilled,
   FolderOutlined,
   UnorderedListOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
 import logo from "../images/YapperLogo7.png";
 import {
@@ -91,15 +92,12 @@ function LayoutPage() {
         >
           <div className="w-full flex justify-between items-center">
             <div className="flex items-center gap-5 w-4/12">
-              <Image width={50} height={50} src={logo} preview={false} />
-              <div className="flex items-center justify-center gap-2">
-                <Search
-                  theme="light"
-                  placeholder={"Search"}
-                  enterButton={false}
-                  style={{ width: 350 }}
-                />
-                <UnorderedListOutlined className="text-xl text-[#4096FF]" />
+              <div className="flex xl:w-2/12">
+                <Image width={50} height={50} src={logo} preview={false} />
+              </div>
+              <div className="w-full flex items-center gap-2">
+                <Input className="w-10/12" placeholder="Search" prefix={<SearchOutlined className="text-[#8C8C8C]" />}  />
+                {/* TODO: Filter icon would go here */}
               </div>
             </div>
             <div className="border-l-2 h-7 bg-[#F0F0F0] rounded-lg"></div>

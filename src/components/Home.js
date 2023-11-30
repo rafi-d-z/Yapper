@@ -12,8 +12,11 @@ import Profile from "./Profile";
 import Post from "./Post";
 import User from "./User";
 import { getItem } from "../utils/helper_functions";
+import Loading from "./Loading";
 
 function Home() {
+  const [loading, setLoading] = useState(true);
+
   const [newMessage, setNewMessage] = useState(""); // Added state to store the text input value
   const [topThreePosts, setTopThreePosts] = useState([]); // Added state to store the top three messages
   const [topThreeUsers, setTopThreeUsers] = useState([]); // Added state to store the top three followed users
@@ -105,34 +108,41 @@ function Home() {
     }
   };
 
+  const fetchMessages = async () => {
+    try {
+      const { data, error } = await supabase.from("message").select();
+
+      if (error) {
+        throw error;
+      } else if (data) {
+        getTopThreePosts(data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const fetchUsers = async () => {
+    try {
+      const { data, error } = await supabase.from("user").select();
+      if (error) {
+        throw error;
+      } else if (data) {
+        getTopThreeUsers(data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const setUp = async () => {
+    fetchMessages();
+    fetchUsers();
+    setUser(getUser());
+  }
+
   // This use Effect will fetch messages when the page loads, this will grab everything thats currently in the messages db and console log it for now
   useEffect(() => {
-    const fetchMessages = async () => {
-      try {
-        const { data, error } = await supabase.from("message").select();
-
-        if (error) {
-          throw error;
-        } else if (data) {
-          getTopThreePosts(data);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    const fetchUsers = async () => {
-      try {
-        const { data, error } = await supabase.from("user").select();
-        if (error) {
-          throw error;
-        } else if (data) {
-          getTopThreeUsers(data);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
+    setLoading(true);
     // Redundant code used in other components
     // TODO: put this code in helper_functions.js to reduce overall code and readability
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -142,10 +152,10 @@ function Home() {
       }
       setUser(session?.user ?? null);
     });
-
-    fetchMessages();
-    fetchUsers();
-    setUser(getUser());
+    setUp().then(() => {
+      // give loading animation time to actually display by displaying it for 2 seconds after the data is fetched
+      setTimeout(() => setLoading(false), 2000);
+    })
   }, []);
   // for now to be able to push new message into DB we need a userID, a message type and keywords.
   // there are hard coded in for now but they will eventually have to be receved from the user
@@ -165,7 +175,7 @@ function Home() {
     setNewMessage("");
   };
 
-  return (
+  return (!loading ?
     <div className="min-h-[80vh] w-full flex justify-center">
       <div className="h-full mt-5 w-full flex justify-around">
         {/* left side (profile) */}
@@ -176,50 +186,54 @@ function Home() {
         <div className="w-5/12 max-h-[85vh] pr-3 overflow-y-scroll rounded-2xl">
           {/* {user !== null ? <div></div> : <div />} */}
           <div className="flex flex-col gap-5">
-            {user !== null ? <div className="flex flex-col justify-between py-4 items-center bg-white rounded-2xl h-32">
-              <div className="flex justify-between w-11/12 gap-2">
-                <Image
-                  height={45}
-                  width={45}
-                  className="rounded-full"
-                  preview={false}
-                  src={user.avatar_url}
-                />
-                <Input
-                  className="w-11/12"
-                  placeholder="What do you want to share?"
-                />
-              </div>
-              <div className="flex justify-between w-11/12">
-                <div className="flex justify-between w-3/12">
-                  <Upload {...props}>
-                    <Button
-                      className="border-none shadow-none"
-                      icon={<PictureOutlined />}
-                    >
-                      Photo
-                    </Button>
-                  </Upload>
-                  <Upload {...GIFprops}>
-                    <Button
-                      className="border-none shadow-none"
-                      icon={<FileGifOutlined />}
-                    >
-                      GIF
-                    </Button>
-                  </Upload>
+            {user !== null ? (
+              <div className="flex flex-col justify-between py-4 items-center bg-white rounded-2xl h-32">
+                <div className="flex justify-between w-11/12 gap-2">
+                  <Image
+                    height={45}
+                    width={45}
+                    className="rounded-full"
+                    preview={false}
+                    src={user.avatar_url}
+                  />
+                  <Input
+                    className="w-11/12"
+                    placeholder="What do you want to share?"
+                  />
                 </div>
-                <div className="w-fit">
-                  <Dropdown.Button
-                    icon={<DownOutlined />}
-                    size="small"
-                    menu={{ items }}
-                  >
-                    Submit
-                  </Dropdown.Button>
+                <div className="flex justify-between w-11/12">
+                  <div className="flex justify-between w-3/12">
+                    <Upload {...props}>
+                      <Button
+                        className="border-none shadow-none"
+                        icon={<PictureOutlined />}
+                      >
+                        Photo
+                      </Button>
+                    </Upload>
+                    <Upload {...GIFprops}>
+                      <Button
+                        className="border-none shadow-none"
+                        icon={<FileGifOutlined />}
+                      >
+                        GIF
+                      </Button>
+                    </Upload>
+                  </div>
+                  <div className="w-fit">
+                    <Dropdown.Button
+                      icon={<DownOutlined />}
+                      size="small"
+                      menu={{ items }}
+                    >
+                      Submit
+                    </Dropdown.Button>
+                  </div>
                 </div>
               </div>
-            </div> : <></>}
+            ) : (
+              <></>
+            )}
             {/* where messages will go */}
             {topThreePosts.map((post) => {
               return (
@@ -253,7 +267,7 @@ function Home() {
           </div>
         </div>
       </div>
-    </div>
+    </div> : <Loading />
   );
 }
 export default Home;
