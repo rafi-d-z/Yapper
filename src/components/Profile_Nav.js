@@ -10,7 +10,6 @@ function Profile_Nav(props) {
   ];
 
   const handleDropdownItemClick = (e) => {
-    console.log(e.key);
     // user clicked logout from dropdown
     if(e.key === '2'){
         logout();

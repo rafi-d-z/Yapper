@@ -103,7 +103,8 @@ function Auth() {
             <Form.Item className="w-full h-full mb-0">
               <div className="flex flex-col gap-3 w-full text-center">
                 <Button
-                  className="w-full h-10 bg-[#52C41A] text-white text-lg font-bold"
+                  type="primary"
+                  className="w-full h-10 bg-[#52C41A] hover:bg-[#389e0d] text-white text-lg font-bold"
                   // onClick={handleLogin}
                   htmlType="submit"
                 >

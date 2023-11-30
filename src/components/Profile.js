@@ -3,9 +3,11 @@ import { Image, Button, Card } from "antd";
 import { supabase } from "../utils/supabaseClient";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import Loading from "./Loading";
 
 function Profile() {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   // setLoading(false);
   const getUser = async (user_id) => {
     try {
@@ -26,15 +28,20 @@ function Profile() {
   };
 
   useEffect(() => {
+    setLoading(true);
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         getUser(session?.user.id);
       }
       setUser(session?.user ?? null);
-    });
+    }).then(() => {
+      // give loading animation time to actually display by displaying it for 2 seconds after the data is fetched
+      setTimeout(() => setLoading(false), 500);
+    })
+
   }, []);
 
-  return user ? (
+  return loading ? <Loading /> : (user ? (
     // if the user is signed in then the following code shows
     <div className="h-full w-full flex justify-center items-center">
       <div className="w-10/12 h-full flex flex-col mt-3 mb-5 gap-3">
@@ -78,7 +85,8 @@ function Profile() {
         </Link>
       </div>
     </div>
-  );
+  ))
+  ;
 }
 
 export default Profile;

@@ -79,7 +79,6 @@ function LayoutPage() {
           Button: {
             paddingInline: "0",
             onlyIconSize: 24,
-            defaultColor: "#4096FF",
             primaryColor: "#4096FF",
           },
         },

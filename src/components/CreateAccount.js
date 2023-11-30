@@ -23,12 +23,12 @@ const CreateAccount = () => {
         .insert([{ id: userID, user_name: username, user_type: filter }]);
 
       if (error) {
-        console.error("Supabase insert error:", error);
+        openNotificationRef.current(error.message);
       } else {
         console.log("Supabase insert successful:", data);
       }
     } catch (error) {
-      console.error("An error occurred:", error);
+      openNotificationRef.current(error.message);
     }
   }
   async function signIn() {
@@ -38,12 +38,12 @@ const CreateAccount = () => {
         password: password,
       });
       if (error) {
-        console.error(error);
+        openNotificationRef.current(error.message);
       } else {
         navigate("/");
       }
     } catch (error) {
-      console.log(error);
+      openNotificationRef.current(error.message);
     }
   }
 
@@ -81,7 +81,6 @@ const CreateAccount = () => {
     });
 
     if (error) {
-      console.log(error);
       openNotificationRef.current(error.message);
     } else if (data) {
       // weird trick that if identities == 0 then that means account already exists
