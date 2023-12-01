@@ -65,7 +65,7 @@ function CorporatePage(){
                                     <Upload {...props}>
                                         <Button className="px-2" icon={<UploadOutlined />}>Click to Upload</Button>
                                     </Upload>
-                                    <Button className="px-5 bg-[#4096FF] text-white font-bold" onClick={postJob}>Post</Button>
+                                    <Button type="primary" className="px-5 bg-[#4096FF] text-white font-bold" onClick={postJob}>Post</Button>
                                 </div>
                             </Form>
                         </div>
