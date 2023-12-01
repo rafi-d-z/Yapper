@@ -26,8 +26,11 @@ function Home() {
   const [newBalance, setBalance] = useState();
   // temp usuage
   
-  console.log(user)
+  console.log(user.account_balance)
 
+
+ // Fetches users Balance might be redundant since it's already collected in getUser()
+ // TODO: Use the balance from getUser instead
 const fetchBalance = async () => {
     try {
       const { data, error } = await supabase
@@ -188,7 +191,11 @@ const fetchBalance = async () => {
   // as well as update the state variable so that the app also has the current balance
 
   const handlePostClick = async () => {
-    console.log(newBalance)
+    if (!newMessage.trim() || !newKeywords.trim()) {
+      alert('Please fill in both the message and keywords fields.');
+      return;
+    }
+    
     try{
       const message_total = (newMessage.split(' ').join('').length * 0.1).toFixed(2)
 
