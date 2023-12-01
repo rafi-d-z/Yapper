@@ -22,6 +22,10 @@ function Home() {
   const [topThreeUsers, setTopThreeUsers] = useState([]); // Added state to store the top three followed users
   const [session, setSession] = useState(null);
   const [user, setUser] = useState(null);
+  const [newKeywords, setKeywords] = useState([]);
+  const [newBalance, setBalance] = useState();
+  // temp usuage
+  
 
   // props for upload for messages
   const props = {
@@ -90,6 +94,7 @@ function Home() {
 
   // Redundant code used in other components
   // TODO: put this code in helper_functions.js to reduce overall code and readability
+  // Warning: setBalance was also added here to keep track of the balance on this page
   const getUser = async (user_id) => {
     try {
       const { data, error } = await supabase
@@ -100,6 +105,7 @@ function Home() {
         throw error;
       } else if (data) {
         setUser(data[0]);
+        setBalance(data[0].account_balance)
       } else {
         console.log("found nothing");
       }
@@ -157,22 +163,78 @@ function Home() {
       setTimeout(() => setLoading(false), 2000);
     })
   }, []);
-  // for now to be able to push new message into DB we need a userID, a message type and keywords.
-  // there are hard coded in for now but they will eventually have to be receved from the user
+  
+  // Handle post click, will first check the price of the message, then compare it to its balance
+  // thats init at the beginning
+  // if theres enough balance then it would post the message and update the users balance
+  // as well as update the state variable so that the app also has the current balance
+
   const handlePostClick = async () => {
-    // Log the text input value
-    console.log(newMessage);
-    const { data, error } = await supabase.from("message").insert([
-      {
-        user_id: "9bbe2db9-65b0-4f56-b0cd-1fb808beb764",
-        message_content: newMessage,
-        message_type: "message",
-        keywords: "test",
-      },
-    ]);
+    if (!newMessage.trim() || !newKeywords.trim()) {
+      alert('Please fill in both the message and keywords fields.');
+      return;
+    }
+    
+    try{
+      const message_total = (newMessage.split(' ').join('').length * 0.1).toFixed(2)
+
+      if (newBalance- message_total > 0){
+
+        const keyWordList = newKeywords.split(",").map((keyword) => keyword.trim())
+        const { data: insertData, error: insertError } = await supabase
+          .from("message")
+          .insert([
+            {
+              user_id: user.id,
+              message_content: newMessage,
+              message_type: "message",
+              keywords: keyWordList,
+            },
+
+
+          ]);
+          if (insertError) {
+            throw insertError;
+          } 
+
+        const {data: updateData, data: updatError} = await supabase
+          .from('user')
+          .update({ account_balance: (newBalance - message_total).toFixed(2) })
+          .eq('id', user.id);
+          if (updatError) {
+            throw updatError;
+          } 
+          else  {
+            setBalance((newBalance - message_total).toFixed(2))
+          }
+          
+    }
+      // If insufficent reroute, for now it warns the user
+      else {
+        alert('Warning: Insufficent Balance ')
+
+      }
 
     // Clear the input field
     setNewMessage("");
+    setKeywords("");
+    }
+    catch (error) {
+      console.log(error)
+    }
+    };
+
+  const handleInputChange  = (e) => {
+    const value = e.target.value;
+    setNewMessage(value);
+
+  };
+  const handleKeywordsChange = (e) => {
+    const value = e.target.value;
+    // Split the input into an array of keywords (assuming they are comma-separated)
+    const keywordsArray = value
+    //console.log(keywordsArray.split(",").map((keyword) => keyword.trim()))
+    setKeywords(keywordsArray)
   };
 
   return (!loading ?
@@ -187,7 +249,7 @@ function Home() {
           {/* {user !== null ? <div></div> : <div />} */}
           <div className="flex flex-col gap-5">
             {user !== null ? (
-              <div className="flex flex-col justify-between py-4 items-center bg-white rounded-2xl h-32">
+              <div className="flex flex-col justify-between py-4 items-center bg-white rounded-2xl h-36">
                 <div className="flex justify-between w-11/12 gap-2">
                   <Image
                     height={45}
@@ -199,8 +261,21 @@ function Home() {
                   <Input
                     className="w-11/12"
                     placeholder="What do you want to share?"
+                    value={newMessage}
+                    onChange={handleInputChange}
                   />
                 </div>
+                <div className="flex justify-between py-2 w-11/12 gap-2 ">
+                <p className="justify-center pt-1">Keywords:</p>
+                <Input
+                  className="w-11/12"
+                  placeholder="Keywords: Fun, Operating Systems, Advanced FSM "
+                  value={newKeywords}
+                  onChange={handleKeywordsChange} // This will need to fire with the message above
+                  
+                />
+                
+              </div>
                 <div className="flex justify-between w-11/12">
                   <div className="flex justify-between w-3/12">
                     <Upload {...props}>
@@ -225,6 +300,7 @@ function Home() {
                       icon={<DownOutlined />}
                       size="small"
                       menu={{ items }}
+                      onClick={handlePostClick}
                     >
                       Submit
                     </Dropdown.Button>
