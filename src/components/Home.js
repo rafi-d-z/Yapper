@@ -26,28 +26,6 @@ function Home() {
   const [newBalance, setBalance] = useState();
   // temp usuage
   
-  console.log(user.account_balance)
-
-
- // Fetches users Balance might be redundant since it's already collected in getUser()
- // TODO: Use the balance from getUser instead
-const fetchBalance = async () => {
-    try {
-      const { data, error } = await supabase
-      .from('user')
-      .select('account_balance')
-      .eq('id', user.id);
-      if (error) {
-        throw error;
-      } else if (data) {
-        setBalance(data[0].account_balance)
-  
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
 
   // props for upload for messages
   const props = {
@@ -116,6 +94,7 @@ const fetchBalance = async () => {
 
   // Redundant code used in other components
   // TODO: put this code in helper_functions.js to reduce overall code and readability
+  // Warning: setBalance was also added here to keep track of the balance on this page
   const getUser = async (user_id) => {
     try {
       const { data, error } = await supabase
@@ -126,6 +105,7 @@ const fetchBalance = async () => {
         throw error;
       } else if (data) {
         setUser(data[0]);
+        setBalance(data[0].account_balance)
       } else {
         console.log("found nothing");
       }
@@ -164,7 +144,6 @@ const fetchBalance = async () => {
     fetchMessages();
     fetchUsers();
     setUser(getUser());
-    fetchBalance();
   }
 
   // This use Effect will fetch messages when the page loads, this will grab everything thats currently in the messages db and console log it for now
