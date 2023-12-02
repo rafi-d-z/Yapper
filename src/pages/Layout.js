@@ -8,6 +8,7 @@ import {
   FolderOutlined,
   UnorderedListOutlined,
   SearchOutlined,
+  AppstoreOutlined,
 } from "@ant-design/icons";
 import logo from "../images/YapperLogo7.png";
 import {
@@ -20,7 +21,6 @@ import {
 import { supabase } from "../utils/supabaseClient";
 
 const { Header, Content } = Layout;
-const { Search } = Input;
 
 function LayoutPage() {
   const [keyIndex, setKeyIndex] = useState("1");
@@ -28,7 +28,7 @@ function LayoutPage() {
   const [session, setSession] = useState(null);
 
   const items = [
-    getItem("Home", "1", <HomeFilled />),
+    user == null ? getItem("Home", "1", <HomeFilled />) : getItem("Feed", 1, <AppstoreOutlined />),
     // TO DO: When supabase is connected, make the following items appear if the user has permission for them (Ex: for Corporate user, item 4 should appear in nav)
     // getItem('Profile', '3', <UserOutlined />),
     user !== null && user.user_type === 'corporate' ? getItem("Ads / Jobs", "2", <FolderOutlined />) : null,
