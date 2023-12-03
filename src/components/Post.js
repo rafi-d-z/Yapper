@@ -4,25 +4,16 @@ import {
   EllipsisOutlined,
   ExclamationCircleOutlined,
 } from "@ant-design/icons";
-<<<<<<< HEAD
-import { Image, Badge, Dropdown, Button, Modal, Input } from "antd";
 import getItem from "../utils/helper_functions";
-=======
-import { Image, Badge, Dropdown } from "antd";
+import { Image, Badge, Dropdown, Button, Modal, Input } from "antd";
 import { getItem } from "../utils/helper_functions";
 import Feedback from "./Feedback";
->>>>>>> refs/remotes/origin/main
 
 function Post(props) {
   const { message, likes, dislikes, pid, uuid } = props;
   const [username, setUsername] = useState(null);
   const [subscribers, setSubscribers] = useState(null);
-<<<<<<< HEAD
-  const [isCommentOpen, setIsCommentOpen] = useState(false);
-  const pfp = "https://i.pinimg.com/originals/d8/f5/2c/d8f52ce52985768ccac65f9550baf49e.jpg";
-=======
   const [avatarUrl, setAvatarURL] = useState(null)
->>>>>>> refs/remotes/origin/main
 
   const items = [
     getItem(
