@@ -78,7 +78,7 @@ function Post(props) {
             width={45}
             className="rounded-full"
             preview={false}
-            src={pfp}
+            src='https://i.pinimg.com/originals/d8/f5/2c/d8f52ce52985768ccac65f9550baf49e.jpg'
           />
           <p className="text-lg font-bold">{username}</p>
           <p>{message}</p>
