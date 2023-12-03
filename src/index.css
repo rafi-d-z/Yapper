@@ -5,7 +5,7 @@
 ::-webkit-scrollbar {
     width: 5px
 }
- 
+
 /* Track */
 ::-webkit-scrollbar-track {
     background: #d9d9d9;
@@ -22,3 +22,10 @@
 ::-webkit-scrollbar-thumb:hover {
     background: #0072FD;
 }
+
+/* custom CSS for modal for sign up */
+.ant-modal-header .ant-modal-title {
+    font-size: 40px;
+    text-align: center;
+    font-weight: bold;
+  }

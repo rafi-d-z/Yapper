@@ -2,21 +2,27 @@ import { useEffect, useState } from "react";
 import { supabase } from "../utils/supabaseClient";
 import {
   EllipsisOutlined,
-  LikeOutlined,
-  DislikeOutlined,
-  MoneyCollectOutlined,
   ExclamationCircleOutlined,
-  CommentOutlined
 } from "@ant-design/icons";
+<<<<<<< HEAD
 import { Image, Badge, Dropdown, Button, Modal, Input } from "antd";
 import getItem from "../utils/helper_functions";
+=======
+import { Image, Badge, Dropdown } from "antd";
+import { getItem } from "../utils/helper_functions";
+import Feedback from "./Feedback";
+>>>>>>> refs/remotes/origin/main
 
 function Post(props) {
   const { message, likes, dislikes, pid, uuid } = props;
   const [username, setUsername] = useState(null);
   const [subscribers, setSubscribers] = useState(null);
+<<<<<<< HEAD
   const [isCommentOpen, setIsCommentOpen] = useState(false);
   const pfp = "https://i.pinimg.com/originals/d8/f5/2c/d8f52ce52985768ccac65f9550baf49e.jpg";
+=======
+  const [avatarUrl, setAvatarURL] = useState(null)
+>>>>>>> refs/remotes/origin/main
 
   const items = [
     getItem(
@@ -31,6 +37,7 @@ function Post(props) {
       const resp = await supabase.from("user").select().eq("id", uuid);
       setUsername(resp.data[0].user_name);
       setSubscribers(resp.data[0].subscribers);
+      setAvatarURL(resp.data[0].avatar_url)
     } catch (error) {
       console.log(error);
     }
@@ -51,60 +58,28 @@ function Post(props) {
   return (
     <div className="w-full h-full py-5 flex flex-col justify-between">
       <div className="flex w-11/12 justify-between mx-auto items-center">
-        <div className="gap-4 w-4/12 items-center">
+        <div className="flex gap-4 w-4/12 items-center">
           <Image
             height={45}
             width={45}
             className="rounded-full"
             preview={false}
-            src={pfp}
+            src={avatarUrl}
           />
           <div className="flex flex-col">
             <p className="text-lg font-bold">{username}</p>
             <p className="text-xs text-[#7C7C7C]">{subscribers} subscribers</p>
           </div>
         </div>
-        <Dropdown menu={{ items }}>
+        <Dropdown menu={{ items }} >
           <EllipsisOutlined className="text-2xl font-bold text-[#8C8C8C]" />
         </Dropdown>
       </div>
       <div className="w-11/12 flex items-center mx-auto">
         <p className="text-base">{message}</p>
       </div>
-      <div className="flex w-11/12 mx-auto items-center gap-8">
-        <div className="flex gap-1 items-center">
-          <LikeOutlined className="text-xl text-[#8C8C8C]" />
-          <Badge
-            count={likes}
-            showZero={true}
-            offset={[8, 0]}
-            size="small"
-            color="#F0F0F0"
-            style={{ color: "#8C8C8C", fontSize: "8px", fontWeight: "bold" }}
-            className="text-[#8C8C8C]"
-          >
-            <p className="text-sm font-bold text-[#8C8C8C]">Likes</p>
-          </Badge>
-        </div>
-        <div className="flex gap-1 items-center">
-          <DislikeOutlined className="text-xl text-[#8C8C8C]" />
-          <Badge
-            count={dislikes}
-            showZero={true}
-            offset={[8, 0]}
-            size="small"
-            color="#F0F0F0"
-            style={{ color: "#8C8C8C", fontSize: "8px", fontWeight: "bold" }}
-            className="text-[#8C8C8C]"
-          >
-            <p className="text-sm font-bold text-[#8C8C8C]">Dislikes</p>
-          </Badge>
-        </div>
-        <div className="flex gap-1 items-center">
-          <MoneyCollectOutlined className="text-xl text-[#FADB14]" />
-          <p className="text-sm font-bold text-[#FADB14]">Tip</p>
-        </div>
-        <div className="flex items-center">
+      <Feedback countLikes={likes} countDislikes={dislikes} countComments={likes} pid={pid} uuid={uuid} />
+      <div className="flex items-center">
         <Button className="text-sm font-bold text-[#8C8C8C]" size="small" icon={<CommentOutlined/>} shape='round' type='text' onClick={openComment}>Comment</Button>
         <Modal open={isCommentOpen} onCancel={closeComment} footer={<Button>Comment</Button>}>
         <Image
@@ -122,7 +97,6 @@ function Post(props) {
           
         </Modal>
         </div>
-      </div>
     </div>
   );
 }

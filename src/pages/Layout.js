@@ -1,55 +1,66 @@
 import { useEffect, useState } from "react";
 import Home from "../components/Home";
-// import SearchPage from "./components/Search";
-// import Settings from "./components/Settings";
 import CorporatePage from "../components/Corporate";
-// import Auth from "./components/Auth";
-// import Profile from "./components/Profile";
+import Profile_Nav from "../components/Profile_Nav";
+import { getItem } from "../utils/helper_functions";
 import {
-  SearchOutlined,
   HomeFilled,
-  UserOutlined,
   FolderOutlined,
-  SettingOutlined,
-  LoginOutlined,
-  FilterOutlined,
   UnorderedListOutlined,
+  SearchOutlined,
+  AppstoreOutlined,
 } from "@ant-design/icons";
 import logo from "../images/YapperLogo7.png";
-import { ConfigProvider, Layout, Menu, Image, Input, Button } from "antd";
-// import { supabase } from "../utils/supabaseClient";
-import { useSession } from "@supabase/auth-helpers-react";
+import {
+  ConfigProvider,
+  Layout,
+  Menu,
+  Image,
+  Input,
+} from "antd";
+import { supabase } from "../utils/supabaseClient";
 
-const { Header, Content, Sider } = Layout;
-const { Search } = Input;
-
-function getItem(label, key, icon, children) {
-  return {
-    key,
-    icon,
-    children,
-    label,
-  };
-}
+const { Header, Content } = Layout;
 
 function LayoutPage() {
   const [keyIndex, setKeyIndex] = useState("1");
   const [user, setUser] = useState(null);
-  const session = useSession();
+  const [session, setSession] = useState(null);
 
   const items = [
-    getItem("Home", "1", <HomeFilled />),
+    user == null ? getItem("Home", "1", <HomeFilled />) : getItem("Feed", 1, <AppstoreOutlined />),
     // TO DO: When supabase is connected, make the following items appear if the user has permission for them (Ex: for Corporate user, item 4 should appear in nav)
     // getItem('Profile', '3', <UserOutlined />),
-    user !== null ? getItem("Ads / Jobs", "2", <FolderOutlined />) : null,
+    user !== null && user.user_type === 'corporate' ? getItem("Ads / Jobs", "2", <FolderOutlined />) : null,
     // getItem("Sign in", "3", <LoginOutlined />),
   ];
 
-  useEffect(() => {
-    if (session) {
-      console.log(session);
-      console.log("user is signed in");
+  const getUser = async (user_id) => {
+    try {
+      const { data, error } = await supabase
+        .from("user")
+        .select()
+        .eq("id", user_id);
+      if (error) {
+        throw error;
+      } else if (data) {
+        setUser(data[0]);
+      } else {
+        console.log("found nothing");
+      }
+    } catch (error) {
+      console.log(error);
     }
+  };
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session?.user) {
+        getUser(session?.user.id);
+      }
+      setUser(session?.user ?? null);
+    });
   }, []);
 
   return (
@@ -68,7 +79,6 @@ function LayoutPage() {
           Button: {
             paddingInline: "0",
             onlyIconSize: 24,
-            defaultColor: "#4096FF",
             primaryColor: "#4096FF",
           },
         },
@@ -80,16 +90,13 @@ function LayoutPage() {
           className="w-full sticky top-0 z-[1] flex items-center"
         >
           <div className="w-full flex justify-between items-center">
-            <div className="flex items-center gap-5">
-              <Image width={50} height={50} src={logo} preview={false} />
-              <div className="flex items-center justify-center gap-2">
-                <Search
-                  theme="light"
-                  placeholder={"Search"}
-                  enterButton={false}
-                  style={{ width: 350 }}
-                />
-                <UnorderedListOutlined className="text-xl text-[#4096FF]" />
+            <div className="flex items-center gap-5 w-4/12">
+              <div className="flex xl:w-2/12">
+                <Image width={50} height={50} src={logo} preview={false} />
+              </div>
+              <div className="w-full flex items-center gap-2">
+                <Input className="w-10/12" placeholder="Search" prefix={<SearchOutlined className="text-[#8C8C8C]" />}  />
+                {/* TODO: Filter icon would go here */}
               </div>
             </div>
             <div className="border-l-2 h-7 bg-[#F0F0F0] rounded-lg"></div>
@@ -98,14 +105,20 @@ function LayoutPage() {
               theme="light"
               mode="horizontal"
               items={items}
-              style={{ width: "550px" }}
+              className="w-5/12"
               // When a tab is selected, we change the state variable so that we can keep track of which page to be on
               onSelect={(item) => {
                 setKeyIndex(item.key);
               }}
             />
             <div className="border-l-2 h-7 bg-[#F0F0F0] rounded-lg"></div>
-            <div className="w-64"></div>
+            <div className="w-3/12 px-4">
+              {user ? (
+                <Profile_Nav user={user} />
+              ) : (
+                <></>
+              )}
+            </div>
           </div>
         </Header>
         <Content className="overflow-hidden">

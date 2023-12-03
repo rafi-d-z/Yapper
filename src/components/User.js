@@ -2,7 +2,7 @@ import { Image } from "antd";
 import { PlusCircleFilled } from "@ant-design/icons";
 
 function User(props) {
-  const { username, subscribers, uuid } = props;
+  const { username, subscribers, uuid, avatar } = props;
   return (
     <div className="w-11/12 shadow-none drop-shadow-none" bordered={false}>
       <div className="flex justify-between" id={uuid}>
@@ -12,7 +12,7 @@ function User(props) {
             width={45}
             className="rounded-full"
             preview={false}
-            src="https://i.pinimg.com/originals/d8/f5/2c/d8f52ce52985768ccac65f9550baf49e.jpg"
+            src={avatar}
           />
           <div className="flex flex-col">
             <p className="text-lg m-0 font-bold">{username}</p>
