@@ -277,6 +277,41 @@ function Home() {
         setBalance((newBalance - message_total).toFixed(2));
       }
 
+      if (newBalance- message_total > 0){
+
+        const keyWordList = newKeywords.split(",").map((keyword) => keyword.trim())
+        const { data: insertData, error: insertError } = await supabase
+          .from("message")
+          .insert([
+            {
+              user_id: user.id,
+              message_content: newMessage,
+              message_type: "message",
+              keywords: keyWordList,
+            },
+          ]);
+          if (insertError) {
+            throw insertError;
+          } 
+
+        const {data: updateData, data: updatError} = await supabase
+          .from('user')
+          .update({ account_balance: (newBalance - message_total).toFixed(2) })
+          .eq('id', user.id);
+          if (updatError) {
+            throw updatError;
+          } 
+          else  {
+            setBalance((newBalance - message_total).toFixed(2))
+          }
+          
+    }
+      // If insufficent reroute, for now it warns the user
+      else {
+        alert('Warning: Insufficent Balance ')
+
+      }
+
       // Clear the input fields
       setNewMessage("");
       setKeywords("");
