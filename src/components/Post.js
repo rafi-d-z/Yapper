@@ -8,13 +8,15 @@ import {
   ExclamationCircleOutlined,
   CommentOutlined
 } from "@ant-design/icons";
-import { Image, Badge, Dropdown } from "antd";
+import { Image, Badge, Dropdown, Button, Modal, Input } from "antd";
 import getItem from "../utils/helper_functions";
 
 function Post(props) {
   const { message, likes, dislikes, pid, uuid } = props;
   const [username, setUsername] = useState(null);
   const [subscribers, setSubscribers] = useState(null);
+  const [isCommentOpen, setIsCommentOpen] = useState(false);
+  const pfp = "https://i.pinimg.com/originals/d8/f5/2c/d8f52ce52985768ccac65f9550baf49e.jpg";
 
   const items = [
     getItem(
@@ -34,6 +36,14 @@ function Post(props) {
     }
   };
 
+  const openComment = () => {
+    setIsCommentOpen(true);
+  }
+
+  const closeComment = () => {
+    setIsCommentOpen(false);
+  }
+
   useEffect(() => {
     getData();
   }, []);
@@ -41,13 +51,13 @@ function Post(props) {
   return (
     <div className="w-full h-full py-5 flex flex-col justify-between">
       <div className="flex w-11/12 justify-between mx-auto items-center">
-        <div className="flex justify-between w-4/12 items-center">
+        <div className="gap-4 w-4/12 items-center">
           <Image
             height={45}
             width={45}
             className="rounded-full"
             preview={false}
-            src="https://i.pinimg.com/originals/d8/f5/2c/d8f52ce52985768ccac65f9550baf49e.jpg"
+            src={pfp}
           />
           <div className="flex flex-col">
             <p className="text-lg font-bold">{username}</p>
@@ -61,7 +71,7 @@ function Post(props) {
       <div className="w-11/12 flex items-center mx-auto">
         <p className="text-base">{message}</p>
       </div>
-      <div className="flex w-11/12 mx-auto items-center gap-12">
+      <div className="flex w-11/12 mx-auto items-center gap-8">
         <div className="flex gap-1 items-center">
           <LikeOutlined className="text-xl text-[#8C8C8C]" />
           <Badge
@@ -94,9 +104,23 @@ function Post(props) {
           <MoneyCollectOutlined className="text-xl text-[#FADB14]" />
           <p className="text-sm font-bold text-[#FADB14]">Tip</p>
         </div>
-        <div className="flex gap-1 items-center">
-        <CommentOutlined className="text-xl text-[#8C8C8C]"/>
-        <p className="text-sm font-bold text-[#8C8C8C]">Comment</p>
+        <div className="flex items-center">
+        <Button className="text-sm font-bold text-[#8C8C8C]" size="small" icon={<CommentOutlined/>} shape='round' type='text' onClick={openComment}>Comment</Button>
+        <Modal open={isCommentOpen} onCancel={closeComment} footer={<Button>Comment</Button>}>
+        <Image
+            height={45}
+            width={45}
+            className="rounded-full"
+            preview={false}
+            src={pfp}
+          />
+          <p className="text-lg font-bold">{username}</p>
+          <p>{message}</p>
+          <br/>
+          <br/>
+          <Input placeholder="Leave your thoughts!"/>
+          
+        </Modal>
         </div>
       </div>
     </div>
