@@ -3,10 +3,10 @@ import { supabase } from "../utils/supabaseClient";
 import {
   EllipsisOutlined,
   ExclamationCircleOutlined,
+  CommentOutlined
 } from "@ant-design/icons";
-import getItem from "../utils/helper_functions";
+import {getItem} from "../utils/helper_functions";
 import { Image, Badge, Dropdown, Button, Modal, Input } from "antd";
-import { getItem } from "../utils/helper_functions";
 import Feedback from "./Feedback";
 
 function Post(props) {
@@ -14,6 +14,8 @@ function Post(props) {
   const [username, setUsername] = useState(null);
   const [subscribers, setSubscribers] = useState(null);
   const [avatarUrl, setAvatarURL] = useState(null)
+  const [isCommentOpen, setIsCommentOpen] = useState(false);
+  const [comment, setComment] = useState('');
 
   const items = [
     getItem(
@@ -40,6 +42,20 @@ function Post(props) {
 
   const closeComment = () => {
     setIsCommentOpen(false);
+  }
+
+  const updateComment = (e) => {
+    setComment(e.target.value);
+
+  }
+
+  const postComment = () => {
+    console.log(comment);
+    const commentResp = supabase.from("comment");
+    commentResp.insert([{
+      comment_content: comment
+    }])
+
   }
 
   useEffect(() => {
@@ -72,20 +88,19 @@ function Post(props) {
       <Feedback countLikes={likes} countDislikes={dislikes} countComments={likes} pid={pid} uuid={uuid} />
       <div className="flex items-center">
         <Button className="text-sm font-bold text-[#8C8C8C]" size="small" icon={<CommentOutlined/>} shape='round' type='text' onClick={openComment}>Comment</Button>
-        <Modal open={isCommentOpen} onCancel={closeComment} footer={<Button>Comment</Button>}>
+        <Modal open={isCommentOpen} onCancel={closeComment} footer={<Button onClick={postComment} className="font-bold text-[#4096ff]" type='text'>Comment</Button>}>
         <Image
             height={45}
             width={45}
             className="rounded-full"
             preview={false}
-            src='https://i.pinimg.com/originals/d8/f5/2c/d8f52ce52985768ccac65f9550baf49e.jpg'
+            src={avatarUrl}
           />
           <p className="text-lg font-bold">{username}</p>
           <p>{message}</p>
           <br/>
           <br/>
-          <Input placeholder="Leave your thoughts!"/>
-          
+          <Input onChange={updateComment} placeholder="Leave your thoughts!"/>
         </Modal>
         </div>
     </div>
