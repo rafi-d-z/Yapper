@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { supabase } from "../utils/supabaseClient";
 import {
   EllipsisOutlined,
+  LikeOutlined,
+  DislikeOutlined,
+  MoneyCollectOutlined,
   ExclamationCircleOutlined,
+  CommentOutlined
 } from "@ant-design/icons";
-import getItem from "../utils/helper_functions";
-import { Image, Badge, Dropdown, Button, Modal, Input } from "antd";
+import { Image, Badge, Dropdown } from "antd";
 import { getItem } from "../utils/helper_functions";
-import Feedback from "./Feedback";
 
 function Post(props) {
   const { message, likes, dislikes, pid, uuid } = props;
@@ -34,14 +36,6 @@ function Post(props) {
     }
   };
 
-  const openComment = () => {
-    setIsCommentOpen(true);
-  }
-
-  const closeComment = () => {
-    setIsCommentOpen(false);
-  }
-
   useEffect(() => {
     getData();
   }, []);
@@ -66,28 +60,52 @@ function Post(props) {
           <EllipsisOutlined className="text-2xl font-bold text-[#8C8C8C]" />
         </Dropdown>
       </div>
-      <div className="w-11/12 flex items-center mx-auto">
+      <div className="w-11/12 flex items-center mx-auto my-2">
         <p className="text-base">{message}</p>
       </div>
-      <Feedback countLikes={likes} countDislikes={dislikes} countComments={likes} pid={pid} uuid={uuid} />
-      <div className="flex items-center">
-        <Button className="text-sm font-bold text-[#8C8C8C]" size="small" icon={<CommentOutlined/>} shape='round' type='text' onClick={openComment}>Comment</Button>
-        <Modal open={isCommentOpen} onCancel={closeComment} footer={<Button>Comment</Button>}>
-        <Image
-            height={45}
-            width={45}
-            className="rounded-full"
-            preview={false}
-            src='https://i.pinimg.com/originals/d8/f5/2c/d8f52ce52985768ccac65f9550baf49e.jpg'
-          />
-          <p className="text-lg font-bold">{username}</p>
-          <p>{message}</p>
-          <br/>
-          <br/>
-          <Input placeholder="Leave your thoughts!"/>
-          
-        </Modal>
+      <div className="flex w-11/12 mx-auto items-center gap-12 my-2">
+          <Badge
+            count={likes}
+            showZero={true}
+            offset={[8, 0]}
+            size="small"
+            color="#F0F0F0"
+            style={{ color: "#8C8C8C", fontSize: "8px", fontWeight: "bold" }}
+            className="flex gap-1 p-1 items-center rounded-md cursor-pointer text-[#8C8C8C] hover:text-[#4096FF] hover:bg-[#F5F5F5]"
+          >
+            <LikeOutlined className="text-xl" />
+            <p className="text-sm font-bold">Likes</p>
+          </Badge>
+          <Badge
+            count={dislikes}
+            showZero={true}
+            offset={[8, 0]}
+            size="small"
+            color="#F0F0F0"
+            style={{ color: "#8C8C8C", fontSize: "8px", fontWeight: "bold" }}
+            className="flex gap-1 p-1 items-center rounded-md cursor-pointer text-[#8C8C8C] hover:text-[#4096FF] hover:bg-[#F5F5F5]"
+          >
+            <DislikeOutlined className="text-xl" />
+            <p className="text-sm font-bold">Dislikes</p>
+          </Badge>
+        <div className="flex gap-1 items-center p-1">
+          <MoneyCollectOutlined className="text-xl text-[#FADB14]" />
+          <p className="text-sm font-bold text-[#FADB14]">Tip</p>
         </div>
+        <Badge
+          // TO DO: Update to show the number of comments under post 
+          count={dislikes}
+          showZero={true}
+          offset={[8, 0]}
+          size="small"
+          color="#F0F0F0"
+          style={{ color: "#8C8C8C", fontSize: "8px", fontWeight: "bold" }}
+          className="flex gap-1 p-1 items-center rounded-md cursor-pointer text-[#8C8C8C] hover:text-[#4096FF] hover:bg-[#F5F5F5]"
+        >
+          <CommentOutlined className="text-xl" />
+          <p className="text-sm font-bold">Comments</p>
+        </Badge>
+      </div>
     </div>
   );
 }
