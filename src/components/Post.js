@@ -16,6 +16,8 @@ function Post(props) {
   const [avatarUrl, setAvatarURL] = useState(null)
   const [isCommentOpen, setIsCommentOpen] = useState(false);
   const [comment, setComment] = useState('');
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const items = [
     getItem(
@@ -36,6 +38,24 @@ function Post(props) {
     }
   };
 
+  const getUser = async (user_id) => {
+    try {
+      const { data, error } = await supabase
+        .from("user")
+        .select()
+        .eq("id", user_id);
+      if (error) {
+        throw error;
+      } else if (data) {
+        setUser(data[0]);
+      } else {
+        console.log("found nothing");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const openComment = () => {
     setIsCommentOpen(true);
   }
@@ -49,18 +69,29 @@ function Post(props) {
 
   }
 
-  const postComment = () => {
+  const postComment = async() => {
     console.log(comment);
-    const commentResp = supabase.from("comment");
-    commentResp.insert([{
+    const{data, error} = await supabase
+    .from("comment")
+    .upsert({
+      commenter_id: user.id,
+      message_id: pid,
+      profile_id: uuid,
       comment_content: comment
-    }])
-
+    });
   }
 
   useEffect(() => {
     getData();
-  }, []);
+
+    setLoading(true);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        getUser(session?.user.id);
+      }
+      setUser(session?.user ?? null);
+    });
+  }, [])
 
   return (
     <div className="w-full h-full py-5 flex flex-col justify-between">
