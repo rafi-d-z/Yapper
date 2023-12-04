@@ -24,33 +24,43 @@ function Home() {
   const [user, setUser] = useState(null);
   const [newKeywords, setKeywords] = useState([]);
   const [newBalance, setBalance] = useState();
-  // temp usuage
+  const [fileNames, setFileNames] = useState({ image: '', gif: '' });
+  const [imageFileList, setImageFileList] = useState([]); // image input
+  const [gifFileList, setGifFileList] = useState([]); // gif input
+
+  let imageFileUrl = '/'; // when image is posted , this will be updated with the url of the image in the media bucket 
+  let gifFileUrl = '/'; // when gif is posted , this will be updated with the url of the gif in the media bucket 
   
 
-  // props for upload for messages
+  // props for image upload for messages
   const props = {
     beforeUpload: (file) => {
-      const isPNG = file.type === "image/png";
-      if (!isPNG) {
-        // message.error(`${file.name} is not a png file`);
+      const allowedImageTypes = ["image/png", "image/jpeg"];
+      const isAllowedType = allowedImageTypes.includes(file.type);
+  
+      if (!isAllowedType) {
+         console.log(`${file.name} is not a supported image type`);
       }
-      return isPNG || Upload.LIST_IGNORE;
+  
+      return isAllowedType || Upload.LIST_IGNORE;
     },
     onChange: (info) => {
+      setImageFileList(info.fileList);
       console.log(info.fileList);
     },
   };
-
+  
+  // props for gif upload for messages
   const GIFprops = {
     beforeUpload: (file) => {
-      // TO DO: check if this logic is correct bc pretty sure its not
       const isGIF = file.type === "image/gif";
       if (!isGIF) {
-        // message.error(`${file.name} is not a GIF file`);
+        console.log(`${file.name} is not a GIF file`);
       }
       return isGIF || Upload.LIST_IGNORE;
     },
     onChange: (info) => {
+      setGifFileList(info.fileList);
       console.log(info.fileList);
     },
   };
@@ -174,9 +184,98 @@ function Home() {
       alert('Please fill in both the message and keywords fields.');
       return;
     }
-    
-    try{
-      const message_total = (newMessage.split(' ').join('').length * 0.1).toFixed(2)
+  
+    try {
+      const message_total = (newMessage.split(' ').join('').length * 0.1).toFixed(2);
+
+      // Upload image file (if selected)
+      
+      if (imageFileList && imageFileList.length > 0) {
+        const imageFile = imageFileList[0].originFileObj;
+        const fileName = imageFileList[0].name;
+        // concatenating the url of the bucket with the image name so it is accessible
+        imageFileUrl = `https://gopjsvqjoeoawvccsgax.supabase.co/storage/v1/object/public/media/${fileName}`;
+        console.log(imageFileUrl);
+
+        const { data: imageData, error: imageError } = await supabase
+          .storage
+          .from('media')
+          .upload(fileName, imageFile, {
+            cacheControl: '3600',
+            upsert: false
+          });
+      
+        if (imageError) {
+          throw imageError;
+        }
+        // Save the image filename
+        setFileNames(prevState => ({ ...prevState, image: imageFile.name }));
+      }
+      
+      // Upload GIF file (if selected)
+      
+      if (gifFileList && gifFileList.length > 0) {
+        const gifFile = gifFileList[0].originFileObj;
+        const fileName = gifFileList[0].name;
+        // concatenating the url of the bucket with the gif name so it is accessible
+        gifFileUrl = `https://gopjsvqjoeoawvccsgax.supabase.co/storage/v1/object/public/media/${fileName}`;
+        console.log(gifFileUrl);
+        const { data: gifData, error: gifError } = await supabase
+          .storage
+          .from('media')
+          .upload(fileName, gifFile, {
+            cacheControl: '3600',
+            upsert: false
+          });
+      
+        if (gifError) {
+          throw gifError;
+        }
+        // Save the GIF filename
+        setFileNames(prevState => ({ ...prevState, gif: gifFile.name }));
+      }
+
+  // Update boolean variables based on whether an image or video is uploaded
+    var isImageUploaded;
+    var isGifUploaded;
+    if (imageFileUrl === '/') {isImageUploaded = false;
+    } else {isImageUploaded = true;}
+
+    if (gifFileUrl === '/') {isGifUploaded = false; 
+    } else {isGifUploaded = true;}
+
+  // Insert message into the database
+  const keyWordList = newKeywords.split(",").map((keyword) => keyword.trim());
+  const { data: insertData, error: insertError } = await supabase
+    .from("message")
+    .insert([
+      {
+        user_id: user.id,
+        message_content: newMessage,
+        message_type: "message",
+        keywords: keyWordList,
+        image_url: imageFileUrl,
+        video_url: gifFileUrl,
+        contains_video: isGifUploaded,
+        contains_image: isImageUploaded,
+      },
+    ]);
+  
+      if (insertError) {
+        throw insertError;
+      }
+  
+      // Update user's account balance
+      const { data: updateData, error: updateError } = await supabase
+        .from('user')
+        .update({ account_balance: (newBalance - message_total).toFixed(2) })
+        .eq('id', user.id);
+  
+      if (updateError) {
+        throw updateError;
+      } else {
+        setBalance((newBalance - message_total).toFixed(2));
+      }
 
       if (newBalance- message_total > 0){
 
@@ -190,8 +289,6 @@ function Home() {
               message_type: "message",
               keywords: keyWordList,
             },
-
-
           ]);
           if (insertError) {
             throw insertError;
@@ -215,14 +312,15 @@ function Home() {
 
       }
 
-    // Clear the input field
-    setNewMessage("");
-    setKeywords("");
+      // Clear the input fields
+      setNewMessage("");
+      setKeywords("");
+    } catch (error) {
+      console.log(error);
     }
-    catch (error) {
-      console.log(error)
-    }
-    };
+  };
+  
+  
 
   const handleInputChange  = (e) => {
     const value = e.target.value;
