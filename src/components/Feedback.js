@@ -10,6 +10,9 @@ function Feedback(props){
     const {pid, uuid} = props;
     const [isLikeActive, setIsLikeActive] = useState(false);
     const [isDislikeActive, setIsDislikeActive] = useState(false);
+    
+    // TO DO: When liking, update total_likes of user
+    // ^ same with disliking
 
     async function checkIfLiked(){
         try{
@@ -49,10 +52,17 @@ function Feedback(props){
             if(error){
                 throw error;
             } else {
-                // set like active for UI
-                setIsLikeActive(true);
+                const { error } = await supabase
+                .from('message')
+                .update({likes: parseInt(countLikes + 1)})
+                .eq('id', pid)
+                if( error ) {
+                    throw error;
+                }
                 // increase like counter for UI
                 setCountLikes(countLikes + 1)
+                // set like active for UI
+                setIsLikeActive(true);
                 // if post is already disliked, we cant have the user liked and disliked the same post so we call helper undislike function
                 if(isDislikeActive === true){
                     undislike();
@@ -72,7 +82,14 @@ function Feedback(props){
             .eq("pid", pid);
             if(error){
                 throw error;
-            } else {
+            } else {          
+                const { error } = await supabase
+                .from('message')
+                .update({likes: parseInt(countLikes - 1)})
+                .eq('id', pid)
+                if (error){
+                    throw error
+                }
                 setIsLikeActive(false);
                 setCountLikes(countLikes - 1)
             }
@@ -119,6 +136,13 @@ function Feedback(props){
             if(error){
                 throw error;
             } else {
+                const { error } = await supabase
+                .from('message')
+                .update({dislikes: parseInt(countDislikes + 1)})
+                .eq('id', pid)
+                if( error ) {
+                    throw error;
+                }
                 setIsDislikeActive(true);
                 setCountDislikes(countDislikes + 1)
                 // If user has already liked post, must unlike it due to the constriction that user can't like and dislike same post
@@ -141,6 +165,13 @@ function Feedback(props){
             if(error){
                 throw error;
             } else {
+                const { error } = await supabase
+                .from('message')
+                .update({dislikes: parseInt(countDislikes - 1)})
+                .eq('id', pid)
+                if( error ) {
+                    throw error;
+                }
                 setIsDislikeActive(false);
                 setCountDislikes(countDislikes - 1)
             }
