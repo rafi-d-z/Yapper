@@ -149,13 +149,39 @@ function Feedback(props){
         }
     }
 
+    async function checkIfUserLoggedIn(){
+        try {
+            const { data, error } = await supabase.auth.getSession()
+            if(error){
+                throw error;
+            } else if (data){
+                if(data.session === null){
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+        } catch (error){
+            console.log(error);
+        }
+    }
+
     useEffect(() => {
-        const {countComments} = props;
-        // setCountLikes(countLikes);
-        setCountComments(countComments);
-        // check if post is liked
-        checkIfLiked()
-        checkIfDisliked()
+        // check if user is logged in before performing these
+        checkIfUserLoggedIn().then((promise) => {
+            if(promise === true){
+                const {countComments} = props;
+                // setCountLikes(countLikes);
+                setCountComments(countComments);
+                // check if post is liked
+                checkIfLiked()
+                checkIfDisliked()
+            } else {
+                const {countComments} = props;
+                setCountComments(countComments);
+            }
+        })
+       
     }, [])
 
     return (
