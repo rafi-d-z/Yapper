@@ -309,15 +309,15 @@ function Feedback(props){
         {isDislikeActive ? <DislikeFilled className="text-xl text-[#ff7a45]" /> : <DislikeOutlined className="text-xl" />}
         <p className={isDislikeActive ? "text-sm font-bold text-[#ff7a45]" : "text-sm font-bold"}>Dislikes</p>
       </Badge>
-    <div className="flex gap-1 items-center p-1 hover:text-[#4096FF] hover:bg-[#F5F5F5] " onClick={openTipPanel}>
+    <div className="flex gap-1 items-center p-1 hover:text-[#4096FF] rounded-md cursor-pointer hover:bg-[#F5F5F5] " onClick={openTipPanel}>
       <MoneyCollectOutlined className="text-xl text-[#FADB14] " />
       <p className="text-sm font-bold text-[#FADB14]">Tip</p>
       
     </div>
 {/* Ant Design Modal for Tip */}
         <Modal
+        open={isTipActive}
         title="Tip This Post!"
-        visible={isTipActive}
         onCancel={closeTipPanel}
         footer={null} // You can customize the footer if needed
       >
