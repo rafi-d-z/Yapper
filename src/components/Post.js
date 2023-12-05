@@ -3,19 +3,17 @@ import { supabase } from "../utils/supabaseClient";
 import {
   EllipsisOutlined,
   ExclamationCircleOutlined,
-  CommentOutlined
 } from "@ant-design/icons";
-import {getItem} from "../utils/helper_functions";
-import { Image, Badge, Dropdown, Button, Modal, Input } from "antd";
+import { getItem } from "../utils/helper_functions";
+import { Image, Dropdown } from "antd";
 import Feedback from "./Feedback";
 
 function Post(props) {
-  const { message, likes, dislikes, pid, uuid } = props;
+  // pid is the id of this particular post, uuid is the id of the user who POSTED this particular post (not the user logged in)
+  const { message, pid, uuid } = props;
   const [username, setUsername] = useState(null);
   const [subscribers, setSubscribers] = useState(null);
   const [avatarUrl, setAvatarURL] = useState(null)
-  const [isCommentOpen, setIsCommentOpen] = useState(false);
-  const [comment, setComment] = useState('');
 
   const items = [
     getItem(
@@ -35,28 +33,6 @@ function Post(props) {
       console.log(error);
     }
   };
-
-  const openComment = () => {
-    setIsCommentOpen(true);
-  }
-
-  const closeComment = () => {
-    setIsCommentOpen(false);
-  }
-
-  const updateComment = (e) => {
-    setComment(e.target.value);
-
-  }
-
-  const postComment = () => {
-    console.log(comment);
-    const commentResp = supabase.from("comment");
-    commentResp.insert([{
-      comment_content: comment
-    }])
-
-  }
 
   useEffect(() => {
     getData();
@@ -85,24 +61,7 @@ function Post(props) {
       <div className="w-11/12 flex items-center mx-auto">
         <p className="text-base">{message}</p>
       </div>
-      <Feedback countLikes={likes} countDislikes={dislikes} countComments={likes} pid={pid} uuid={uuid} />
-      <div className="flex items-center">
-        <Button className="text-sm font-bold text-[#8C8C8C]" size="small" icon={<CommentOutlined/>} shape='round' type='text' onClick={openComment}>Comment</Button>
-        <Modal open={isCommentOpen} onCancel={closeComment} footer={<Button onClick={postComment} className="font-bold text-[#4096ff]" type='text'>Comment</Button>}>
-        <Image
-            height={45}
-            width={45}
-            className="rounded-full"
-            preview={false}
-            src={avatarUrl}
-          />
-          <p className="text-lg font-bold">{username}</p>
-          <p>{message}</p>
-          <br/>
-          <br/>
-          <Input onChange={updateComment} placeholder="Leave your thoughts!"/>
-        </Modal>
-        </div>
+      <Feedback pid={pid} uuid={uuid} />
     </div>
   );
 }
