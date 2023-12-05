@@ -6,7 +6,7 @@ import {
   CommentOutlined
 } from "@ant-design/icons";
 import {getItem} from "../utils/helper_functions";
-import { Image, Badge, Dropdown, Button, Modal, Input } from "antd";
+import { Image, Badge, Dropdown, Button, Modal, Input, List, Avatar } from "antd";
 import Feedback from "./Feedback";
 
 function Post(props) {
@@ -70,16 +70,24 @@ function Post(props) {
   }
 
   const postComment = async() => {
-    console.log(comment);
     const{data, error} = await supabase
     .from("comment")
-    .upsert({
+    .insert({
       commenter_id: user.id,
       message_id: pid,
       profile_id: uuid,
       comment_content: comment
     });
+    console.log((await comments).data);
   }
+
+  const comments = supabase
+    .from('comment')
+    .select('comment_content')
+    .eq('message_id',pid);
+
+  const commentsSection = 
+
 
   useEffect(() => {
     getData();
@@ -119,7 +127,7 @@ function Post(props) {
       <Feedback countLikes={likes} countDislikes={dislikes} countComments={likes} pid={pid} uuid={uuid} />
       <div className="flex items-center">
         <Button className="text-sm font-bold text-[#8C8C8C]" size="small" icon={<CommentOutlined/>} shape='round' type='text' onClick={openComment}>Comment</Button>
-        <Modal open={isCommentOpen} onCancel={closeComment} footer={<Button onClick={postComment} className="font-bold text-[#4096ff]" type='text'>Comment</Button>}>
+        <Modal open={isCommentOpen} onCancel={closeComment} footer={null}>
         <Image
             height={45}
             width={45}
@@ -128,10 +136,23 @@ function Post(props) {
             src={avatarUrl}
           />
           <p className="text-lg font-bold">{username}</p>
-          <p>{message}</p>
+          <br/>
+          <div style={{fontSize:'30px'}}>{message}</div>
           <br/>
           <br/>
           <Input onChange={updateComment} placeholder="Leave your thoughts!"/>
+          <br/>
+          <br/>
+          <Button style={{padding:'0px 10px', border:"solid", borderWidth:'1px'}} onClick={postComment} className="font-bold text-[#4096ff]" type='text'>Comment</Button>
+          <List>
+            <List.Item>
+              <List.Item.Meta
+              avatar={<Avatar src={avatarUrl}/>}
+              title={<div style={{fontWeight:'bold'}}>rafid</div>}
+              description='ur mom'
+              />
+            </List.Item>
+          </List>
         </Modal>
         </div>
     </div>
