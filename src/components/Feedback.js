@@ -2,6 +2,7 @@ import { Badge,  Modal, Input } from "antd";
 import { useState, useEffect } from "react";
 import { supabase } from "../utils/supabaseClient";
 import { LikeOutlined, LikeFilled, DislikeOutlined, MoneyCollectOutlined, CommentOutlined, DislikeFilled } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 
 function Feedback(props){
     const [countLikes, setCountLikes] = useState(0);
@@ -12,12 +13,14 @@ function Feedback(props){
     // pid is the post id of this post
     const [isLikeActive, setIsLikeActive] = useState(false);
     const [isDislikeActive, setIsDislikeActive] = useState(false);
+
     const [isTipActive, setIsTipActive] = useState(false);
     const [session, setSession] = useState(null);
     const [user, setUser] = useState(null);
     const [balance, setBalance] = useState();
     const [recipientBalance, setRecipientBalance] = useState();
     const [recipientTip, setRecipientTip] = useState();
+    const navigate = useNavigate();
 
     const getUser = async (user_id) => {
         try {
@@ -162,10 +165,17 @@ function Feedback(props){
             if(error){
                 throw error;
             } else {
-                // set like active for UI
-                setIsLikeActive(true);
+                const { error } = await supabase
+                .from('message')
+                .update({likes: parseInt(countLikes + 1)})
+                .eq('id', pid)
+                if( error ) {
+                    throw error;
+                }
                 // increase like counter for UI
                 setCountLikes(countLikes + 1)
+                // set like active for UI
+                setIsLikeActive(true);
                 // if post is already disliked, we cant have the user liked and disliked the same post so we call helper undislike function
                 if(isDislikeActive === true){
                     undislike();
@@ -185,7 +195,14 @@ function Feedback(props){
             .eq("pid", pid);
             if(error){
                 throw error;
-            } else {
+            } else {          
+                const { error } = await supabase
+                .from('message')
+                .update({likes: parseInt(countLikes - 1)})
+                .eq('id', pid)
+                if (error){
+                    throw error
+                }
                 setIsLikeActive(false);
                 setCountLikes(countLikes - 1)
             }
@@ -232,6 +249,13 @@ function Feedback(props){
             if(error){
                 throw error;
             } else {
+                const { error } = await supabase
+                .from('message')
+                .update({dislikes: parseInt(countDislikes + 1)})
+                .eq('id', pid)
+                if( error ) {
+                    throw error;
+                }
                 setIsDislikeActive(true);
                 setCountDislikes(countDislikes + 1)
                 // If user has already liked post, must unlike it due to the constriction that user can't like and dislike same post
@@ -254,6 +278,13 @@ function Feedback(props){
             if(error){
                 throw error;
             } else {
+                const { error } = await supabase
+                .from('message')
+                .update({dislikes: parseInt(countDislikes - 1)})
+                .eq('id', pid)
+                if( error ) {
+                    throw error;
+                }
                 setIsDislikeActive(false);
                 setCountDislikes(countDislikes - 1)
             }
@@ -262,23 +293,55 @@ function Feedback(props){
         }
     }
 
+    async function checkIfUserLoggedIn(){
+        try {
+            const { data, error } = await supabase.auth.getSession()
+            if(error){
+                throw error;
+            } else if (data){
+                if(data.session === null){
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+        } catch (error){
+            console.log(error);
+        }
+    }
+
     useEffect(() => {
-        const {countComments} = props;
-        // setCountLikes(countLikes);
-        setCountComments(countComments);
-        // check if post is liked
-        checkIfLiked()
-        checkIfDisliked()
+        // const {countComments} = props;
+        // // setCountLikes(countLikes);
+        // setCountComments(countComments);
+        // // check if post is liked
+        // checkIfLiked()
+        // checkIfDisliked()
         supabase.auth.getSession().then(({ data: { session } }) => {
             if (session?.user) {
               getUser(session?.user.id);
             }
             setUser(session?.user ?? null);
           })
-        getPoster()
+        // getPoster()
         //setrecipientBalance(post.account_balance)
         //setrecipientTip(post.tips)
 
+        // check if user is logged in before performing these
+        checkIfUserLoggedIn().then((promise) => {
+            if(promise === true){
+                const {countComments} = props;
+                // setCountLikes(countLikes);
+                setCountComments(countComments);
+                // check if post is liked
+                checkIfLiked()
+                checkIfDisliked() 
+            } else {
+                const {countComments} = props;
+                setCountComments(countComments);
+            }
+            getPoster()
+        })
     }, [])
 
     return (
@@ -309,7 +372,7 @@ function Feedback(props){
         {isDislikeActive ? <DislikeFilled className="text-xl text-[#ff7a45]" /> : <DislikeOutlined className="text-xl" />}
         <p className={isDislikeActive ? "text-sm font-bold text-[#ff7a45]" : "text-sm font-bold"}>Dislikes</p>
       </Badge>
-    <div className="flex gap-1 items-center p-1 hover:text-[#4096FF] rounded-md cursor-pointer hover:bg-[#F5F5F5] " onClick={openTipPanel}>
+    <div className="flex gap-1 items-center p-1 hover:text-[#4096FF] rounded-md cursor-pointer hover:bg-[#F5F5F5] " onClick={user ? openTipPanel : () => navigate('/auth')}>
       <MoneyCollectOutlined className="text-xl text-[#FADB14] " />
       <p className="text-sm font-bold text-[#FADB14]">Tip</p>
       

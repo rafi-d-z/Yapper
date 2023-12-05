@@ -1,4 +1,4 @@
-import { Input, Button, Image, Upload, Dropdown, Badge } from "antd";
+import { Input, Button, Image, Upload, Dropdown, Badge, Modal } from "antd";
 import {
   PictureOutlined,
   FileGifOutlined,
@@ -8,13 +8,13 @@ import {
 } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { supabase } from "../utils/supabaseClient";
-import Profile from "./Profile";
-import Post from "./Post";
-import User from "./User";
+import Profile from "../components/Profile";
+import Post from "../components/Post";
+import User from "../components/User";
 import { getItem } from "../utils/helper_functions";
-import Loading from "./Loading";
+import Loading from "../components/Loading";
 
-function Home() {
+function Feed() {
   const [loading, setLoading] = useState(true);
 
   const [newMessage, setNewMessage] = useState(""); // Added state to store the text input value
@@ -25,7 +25,6 @@ function Home() {
   const [newKeywords, setKeywords] = useState([]);
   const [newBalance, setBalance] = useState();
   // temp usuage
-  
 
   // props for upload for messages
   const props = {
@@ -346,4 +345,4 @@ function Home() {
     </div> : <Loading />
   );
 }
-export default Home;
+export default Feed;
