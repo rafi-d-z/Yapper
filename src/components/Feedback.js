@@ -1,15 +1,131 @@
-import { Badge } from "antd";
+import { Badge,  Modal, Input } from "antd";
 import { useState, useEffect } from "react";
 import { supabase } from "../utils/supabaseClient";
 import { LikeOutlined, LikeFilled, DislikeOutlined, MoneyCollectOutlined, CommentOutlined, DislikeFilled } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 
 function Feedback(props){
     const [countLikes, setCountLikes] = useState(0);
     const [countDislikes, setCountDislikes] = useState(0)
     const [countComments, setCountComments] = useState(0)
+    const [tipAmount, setTipAmount] = useState('');
     const {pid, uuid} = props;
+    // pid is the post id of this post
     const [isLikeActive, setIsLikeActive] = useState(false);
     const [isDislikeActive, setIsDislikeActive] = useState(false);
+
+    const [isTipActive, setIsTipActive] = useState(false);
+    const [session, setSession] = useState(null);
+    const [user, setUser] = useState(null);
+    const [balance, setBalance] = useState();
+    const [recipientBalance, setRecipientBalance] = useState();
+    const [recipientTip, setRecipientTip] = useState();
+    const navigate = useNavigate();
+
+    const getUser = async (user_id) => {
+        try {
+          const { data, error } = await supabase
+            .from("user")
+            .select()
+            .eq("id", user_id);
+          if (error) {
+            throw error;
+          } else if (data) {
+            setUser(data[0]);
+            setBalance(data[0].account_balance)
+          } else {
+            console.log("found nothing");
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      };
+
+    const getPoster = async () =>{
+        try{
+            let { data: post, error } = await supabase
+            .from('user')
+            .select()
+            .eq('id', uuid)
+            if(error){
+                throw error;
+            }
+            console.log(post[0].account_balance)
+            setRecipientBalance(post[0].account_balance)
+            console.log(recipientBalance)
+            setRecipientTip(post[0].tips)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const openTipPanel = () => {
+        setIsTipActive(true);
+    };
+
+    const closeTipPanel = () => {
+        setIsTipActive(false);
+        setTipAmount()
+    };
+    const handleTipAmountChange = (e) => {
+        setTipAmount(e.target.value);
+      };
+
+    const tipUser = async () => {
+        const parsedTipAmount = parseFloat(tipAmount);
+        if (!isNaN(parsedTipAmount)) {
+        if (balance  >= tipAmount){
+           // Decrement user balance 
+
+            try{
+                let { data: post, error } = await supabase
+                .from('user')
+                .update({ account_balance: (balance - parsedTipAmount) })
+                .eq('id', user.id);
+                if(error){
+                    throw error;
+                } else {
+                    setBalance(balance - parsedTipAmount)
+                }
+            } catch (error) {
+                console.log(error)
+            }
+
+        
+        // increment the new user's balance and their tips
+        try{
+            let { data: post, error } = await supabase
+            .from('user')
+            .update({ account_balance: (recipientBalance + parsedTipAmount), tips: (recipientTip + parsedTipAmount) })
+            .eq('id', uuid);
+            if(error){
+                throw error;
+            } else {
+                setBalance(balance - parsedTipAmount)
+                setRecipientBalance(recipientBalance + parsedTipAmount)
+                setRecipientTip(recipientTip + parsedTipAmount)
+            }
+        } catch (error) {
+            console.log(error)
+        }
+        }    
+        else{
+            alert("Warning: Insufficent Balance")
+        }
+    }
+    else{
+        alert("Invalid Tip Amount. Please enter a valid number.");
+    }
+
+    // send to the users tip jar
+    // using the pid find the uuid of posting user
+
+    closeTipPanel();
+    };
+    // add function here, if a user clicks on tip it will use the pid to search for the 
+    // in the post table, then grab that users id.
+    // from that users id i can find his table on users
+    // update the tables as needed dec user balance inc recivers balance and tip 
 
     async function checkIfLiked(){
         try{
@@ -49,10 +165,17 @@ function Feedback(props){
             if(error){
                 throw error;
             } else {
-                // set like active for UI
-                setIsLikeActive(true);
+                const { error } = await supabase
+                .from('message')
+                .update({likes: parseInt(countLikes + 1)})
+                .eq('id', pid)
+                if( error ) {
+                    throw error;
+                }
                 // increase like counter for UI
                 setCountLikes(countLikes + 1)
+                // set like active for UI
+                setIsLikeActive(true);
                 // if post is already disliked, we cant have the user liked and disliked the same post so we call helper undislike function
                 if(isDislikeActive === true){
                     undislike();
@@ -72,7 +195,14 @@ function Feedback(props){
             .eq("pid", pid);
             if(error){
                 throw error;
-            } else {
+            } else {          
+                const { error } = await supabase
+                .from('message')
+                .update({likes: parseInt(countLikes - 1)})
+                .eq('id', pid)
+                if (error){
+                    throw error
+                }
                 setIsLikeActive(false);
                 setCountLikes(countLikes - 1)
             }
@@ -119,6 +249,13 @@ function Feedback(props){
             if(error){
                 throw error;
             } else {
+                const { error } = await supabase
+                .from('message')
+                .update({dislikes: parseInt(countDislikes + 1)})
+                .eq('id', pid)
+                if( error ) {
+                    throw error;
+                }
                 setIsDislikeActive(true);
                 setCountDislikes(countDislikes + 1)
                 // If user has already liked post, must unlike it due to the constriction that user can't like and dislike same post
@@ -141,6 +278,13 @@ function Feedback(props){
             if(error){
                 throw error;
             } else {
+                const { error } = await supabase
+                .from('message')
+                .update({dislikes: parseInt(countDislikes - 1)})
+                .eq('id', pid)
+                if( error ) {
+                    throw error;
+                }
                 setIsDislikeActive(false);
                 setCountDislikes(countDislikes - 1)
             }
@@ -149,13 +293,55 @@ function Feedback(props){
         }
     }
 
+    async function checkIfUserLoggedIn(){
+        try {
+            const { data, error } = await supabase.auth.getSession()
+            if(error){
+                throw error;
+            } else if (data){
+                if(data.session === null){
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+        } catch (error){
+            console.log(error);
+        }
+    }
+
     useEffect(() => {
-        const {countComments} = props;
-        // setCountLikes(countLikes);
-        setCountComments(countComments);
-        // check if post is liked
-        checkIfLiked()
-        checkIfDisliked()
+        // const {countComments} = props;
+        // // setCountLikes(countLikes);
+        // setCountComments(countComments);
+        // // check if post is liked
+        // checkIfLiked()
+        // checkIfDisliked()
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session?.user) {
+              getUser(session?.user.id);
+            }
+            setUser(session?.user ?? null);
+          })
+        // getPoster()
+        //setrecipientBalance(post.account_balance)
+        //setrecipientTip(post.tips)
+
+        // check if user is logged in before performing these
+        checkIfUserLoggedIn().then((promise) => {
+            if(promise === true){
+                const {countComments} = props;
+                // setCountLikes(countLikes);
+                setCountComments(countComments);
+                // check if post is liked
+                checkIfLiked()
+                checkIfDisliked() 
+            } else {
+                const {countComments} = props;
+                setCountComments(countComments);
+            }
+            getPoster()
+        })
     }, [])
 
     return (
@@ -186,10 +372,26 @@ function Feedback(props){
         {isDislikeActive ? <DislikeFilled className="text-xl text-[#ff7a45]" /> : <DislikeOutlined className="text-xl" />}
         <p className={isDislikeActive ? "text-sm font-bold text-[#ff7a45]" : "text-sm font-bold"}>Dislikes</p>
       </Badge>
-    <div className="flex gap-1 items-center p-1">
-      <MoneyCollectOutlined className="text-xl text-[#FADB14]" />
+    <div className="flex gap-1 items-center p-1 hover:text-[#4096FF] rounded-md cursor-pointer hover:bg-[#F5F5F5] " onClick={user ? openTipPanel : () => navigate('/auth')}>
+      <MoneyCollectOutlined className="text-xl text-[#FADB14] " />
       <p className="text-sm font-bold text-[#FADB14]">Tip</p>
+      
     </div>
+{/* Ant Design Modal for Tip */}
+        <Modal
+        open={isTipActive}
+        title="Tip This Post!"
+        onCancel={closeTipPanel}
+        footer={null} // You can customize the footer if needed
+      >
+        {/* Add your tip panel content here */}
+        <p className="text-lg font-bold"></p>
+          <p>Remember to be generous!</p>
+          <Input className= "w-1/6" size="small"  placeholder="$0.00" value={tipAmount}
+          onChange={handleTipAmountChange}/>
+          <button className="font-bold text-[#4096ff] p-2" type='text' onClick={tipUser}>Tip</button>
+      </Modal>
+
     <Badge
       // TO DO: Update to show the number of comments under post 
       count={countComments}
