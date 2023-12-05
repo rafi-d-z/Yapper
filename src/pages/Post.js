@@ -13,8 +13,8 @@ function PostPage() {
   const [post, setPost] = useState(null);
   const [user, setUser] = useState(null);
   const [comments, setComments] = useState([]);
-  const [commentText, setCommentText] = useState('');
-  const [loading, setLoading] = useState(false)
+  const [commentText, setCommentText] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function getPost(pid) {
     try {
@@ -45,34 +45,32 @@ function PostPage() {
       if (error) {
         throw error;
       } else if (data) {
-        setComments(data)
+        setComments(data);
         setTimeout(() => setLoading(false), 500);
       } else {
         console.log("found nothing");
       }
     } catch (error) {
-        console.log(error)
+      console.log(error);
     }
   }
 
-  async function postComment(){
-    try{
-        const { error } = await supabase
-          .from("comment")
-          .insert([
-            {
-              commenter_id: user.id,
-              comment_content: commentText,
-              message_id: post.id
-            }
-          ]);
-          if (error) {
-            throw error;
-          }
-          setCommentText('')
-          getComments(post.id) 
-    } catch (error){
-        console.log(error)
+  async function postComment() {
+    try {
+      const { error } = await supabase.from("comment").insert([
+        {
+          commenter_id: user.id,
+          comment_content: commentText,
+          message_id: post.id,
+        },
+      ]);
+      if (error) {
+        throw error;
+      }
+      setCommentText("");
+      getComments(post.id);
+    } catch (error) {
+      console.log(error);
     }
   }
 
@@ -103,7 +101,7 @@ function PostPage() {
     });
   }, []);
 
-  return post && user ? (
+  return post ? (
     <div className="flex flex-col w-full min-h-[80vh] items-center gap-8">
       <div className="w-5/12 bg-white rounded-2xl h-48 mt-5">
         <Post
@@ -113,7 +111,7 @@ function PostPage() {
         />
       </div>
       <div className="w-5/12 bg-white rounded-2xl h-fit gap-4 py-4">
-        <div className="flex w-11/12 mx-auto justify-between">
+       {user ? <div className="flex w-11/12 mx-auto justify-between">
           <Image
             className="w-1/12 rounded-full"
             src={user.avatar_url}
@@ -121,27 +119,35 @@ function PostPage() {
             width={40}
             preview={false}
           />
-          <Input className="w-10/12" placeholder="Type your comment here..." value={commentText} onChange={(e) => {
-            setCommentText(e.target.value)
-        }} />
+          <Input
+            className="w-10/12"
+            placeholder="Type your comment here..."
+            value={commentText}
+            onChange={(e) => {
+              setCommentText(e.target.value);
+            }}
+          />
           <Button
             className="bg-[#4096FF] w-1/12 rounded-full flex items-center justify-center"
             style={{ width: "40px", height: "40px" }}
             icon={<SendOutlined className="text-white" />}
             onClick={postComment}
           />
-        </div>
+        </div> : <></>}
         <Divider className="w-11/12 mx-auto" />
         <div className="w-11/12 mx-auto flex flex-col gap-4">
-          {loading ? <Loading /> :
-          comments.map((comment) => {
-            return (
-              <Comment
-                commenterID={comment.commenter_id}
-                comment_content={comment.comment_content}
-              />
-            );
-          })}
+          {loading ? (
+            <Loading />
+          ) : (
+            comments.map((comment) => {
+              return (
+                <Comment
+                  commenterID={comment.commenter_id}
+                  comment_content={comment.comment_content}
+                />
+              );
+            })
+          )}
         </div>
       </div>
     </div>
