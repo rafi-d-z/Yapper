@@ -18,6 +18,7 @@ function Trending() {
   const [loading, setLoading] = useState(true);
 
   const [topThreePosts, setTopThreePosts] = useState([]); // Added state to store the top three messages
+  const [trendyPosts, setTrendyPosts] = useState([]); // Added state to store the top three messages
   const [topThreeUsers, setTopThreeUsers] = useState([]); // Added state to store the top three followed users
   const [session, setSession] = useState(null);
   const [user, setUser] = useState(null);
@@ -49,6 +50,21 @@ function Trending() {
     const top3 = data.slice(0, 3);
     setTopThreePosts(top3);
   };
+
+  // function to get the trendy posts in desc order (likes - dislikes > 3 and views > 10)
+  const getTrendyPosts = (data, minDifference = 3, minViews = 10, count = 10) => {
+    data.forEach((obj) => {
+      obj.difference = obj.likes - obj.dislikes;
+    });
+    const trendyPosts = data.filter((obj) => obj.difference > minDifference && obj.views > minViews);
+    trendyPosts.sort((a, b) => b.difference - a.difference); // Sort the objects based on the difference in descending order
+    const topTrendy = trendyPosts.slice(0, count);
+  
+    topTrendy.forEach((obj) => delete obj.difference);
+  
+    setTrendyPosts(topTrendy);
+  };
+
   const getTopThreeUsers = (data) => {
     // TO DO: Will have to change in the future for actual requirements of Trendy User
     data.forEach((obj) => {
@@ -90,7 +106,7 @@ function Trending() {
       if (error) {
         throw error;
       } else if (data) {
-        getTopThreePosts(data);
+        getTrendyPosts(data);
       }
     } catch (error) {
       console.log(error);
@@ -142,7 +158,7 @@ function Trending() {
           {/* {user !== null ? <div></div> : <div />} */}
           <div className="flex flex-col gap-5">
             {/* where messages will go */}
-            {topThreePosts.map((post) => {
+            {trendyPosts.map((post) => {
               return (
                 <div className="w-full h-48 min-h-full bg-white rounded-2xl">
                   <Post
