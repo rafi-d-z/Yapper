@@ -258,7 +258,7 @@ function LikesDislikes(props) {
       checkIfLiked(curUser.id, pid);
       checkIfDisliked(curUser.id, pid);
     }
-  });
+  }, []);
 
   return (
     <div className="flex gap-12">

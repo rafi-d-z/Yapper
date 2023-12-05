@@ -107,31 +107,7 @@ function Feedback(props) {
   // from that users id i can find his table on users
   // update the tables as needed dec user balance inc recivers balance and tip
 
-  async function checkIfUserLoggedIn() {
-    try {
-      const { data, error } = await supabase.auth.getSession();
-      if (error) {
-        throw error;
-      } else if (data) {
-        if (data.session === null) {
-          return false;
-        } else {
-          return true;
-        }
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
   useEffect(() => {
-    // const {countComments} = props;
-    // // setCountLikes(countLikes);
-    // setCountComments(countComments);
-    // // check if post is liked
-    // checkIfLiked()
-    // checkIfDisliked()
-
     const getUser = async (user_id) => {
       try {
         const { data, error } = await supabase
@@ -198,7 +174,7 @@ function Feedback(props) {
         </button>
       </Modal>
       {/* Component is found in /components/Feedback */}
-      <Comment />
+      <Comment curUser={user ? user : null} pid={pid} />
     </div>
   );
 }

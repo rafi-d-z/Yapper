@@ -7,6 +7,7 @@ import {
 import { getItem } from "../utils/helper_functions";
 import { Image, Dropdown } from "antd";
 import Feedback from "./Feedback";
+import { useNavigate } from "react-router-dom";
 
 function Post(props) {
   // pid is the id of this particular post, uuid is the id of the user who POSTED this particular post (not the user logged in)
@@ -14,6 +15,7 @@ function Post(props) {
   const [username, setUsername] = useState(null);
   const [subscribers, setSubscribers] = useState(null);
   const [avatarUrl, setAvatarURL] = useState(null)
+  const navigate = useNavigate()
 
   const items = [
     getItem(
@@ -58,7 +60,7 @@ function Post(props) {
           <EllipsisOutlined className="text-2xl font-bold text-[#8C8C8C]" />
         </Dropdown>
       </div>
-      <div className="w-11/12 flex items-center mx-auto">
+      <div className="w-11/12 flex items-center mx-auto cursor-pointer" onClick={() => navigate('/post', {state: pid})}>
         <p className="text-base">{message}</p>
       </div>
       <Feedback pid={pid} uuid={uuid} />
