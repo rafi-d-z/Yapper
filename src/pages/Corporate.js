@@ -1,8 +1,6 @@
 import { Card, Input, Select, Button, Form, message, Upload } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
-import User from "./User";
-import Loading from "./Loading";
 import { supabase } from "../utils/supabaseClient";const { TextArea } = Input; 
 
 
