@@ -86,7 +86,11 @@ function Post(props) {
     .select('comment_content')
     .eq('message_id',pid);
 
-  const commentsSection = 
+  const commentsArray = []
+
+  const commentsSection = comments.forEach(item => {
+    
+  });
 
 
   useEffect(() => {
