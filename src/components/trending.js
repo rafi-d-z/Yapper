@@ -61,9 +61,9 @@ function Trending() {
     setTopThreeUsers(top3);
   };
 
-  // Redundant code used in other components
-  // TODO: put this code in helper_functions.js to reduce overall code and readability
-  // Warning: setBalance was also added here to keep track of the balance on this page
+  // create a trendy posts function for selecting posts that :  >10 reads, #likes -#dislikes>3
+  // implement logic to keep track of trendy user in db, and update 
+
   const getUser = async (user_id) => {
     try {
       const { data, error } = await supabase

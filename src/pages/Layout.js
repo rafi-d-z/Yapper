@@ -1,7 +1,4 @@
 import { useEffect, useState } from "react";
-import Home from "../components/Home";
-import Trending from "../components/trending";
-import CorporatePage from "../components/Corporate";
 import Profile_Nav from "../components/Profile_Nav";
 import { useNavigate } from "react-router-dom";
 import { getItem } from "../utils/helper_functions";
@@ -224,6 +221,7 @@ function LayoutPage() {
                 user !== null && user.user_type === "corporate"
                   ? getItem("Ads / Jobs", "3", <FolderOutlined />)
                   : null,
+                  getItem("Trending", "4", <RiseOutlined />)
                 // getItem("Sign in", "3", <LoginOutlined />),
               ]}
               className="w-5/12"
@@ -233,6 +231,8 @@ function LayoutPage() {
                   navigate("/");
                 } else if (item.key === "2") {
                   navigate("/jobs");
+                } else if (item.key === "4") {
+                  navigate("/Trending");
                 }
               }}
             />
