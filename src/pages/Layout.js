@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Home from "../components/Home";
+import Trending from "../components/trending";
 import CorporatePage from "../components/Corporate";
 import Profile_Nav from "../components/Profile_Nav";
 import { getItem } from "../utils/helper_functions";
@@ -7,6 +8,7 @@ import {
   HomeFilled,
   FolderOutlined,
   UnorderedListOutlined,
+  RiseOutlined,
   SearchOutlined,
   AppstoreOutlined,
 } from "@ant-design/icons";
@@ -32,6 +34,7 @@ function LayoutPage() {
     // TO DO: When supabase is connected, make the following items appear if the user has permission for them (Ex: for Corporate user, item 4 should appear in nav)
     // getItem('Profile', '3', <UserOutlined />),
     user !== null && user.user_type === 'corporate' ? getItem("Ads / Jobs", "2", <FolderOutlined />) : null,
+    getItem("Trending", "3", <RiseOutlined />),
     // getItem("Sign in", "3", <LoginOutlined />),
   ];
 
@@ -122,7 +125,7 @@ function LayoutPage() {
           </div>
         </Header>
         <Content className="overflow-hidden">
-          {keyIndex === "2" ? <CorporatePage /> : <Home />}
+          {keyIndex === "2" ? <CorporatePage /> : keyIndex === "3" ? <Trending /> :<Home />}
         </Content>
       </Layout>
     </ConfigProvider>
