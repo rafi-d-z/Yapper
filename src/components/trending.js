@@ -1,8 +1,5 @@
 import { Input, Button, Image, Upload, Dropdown, Badge } from "antd";
 import {
-  PictureOutlined,
-  FileGifOutlined,
-  DownOutlined,
   SendOutlined,
   ClockCircleOutlined,
 } from "@ant-design/icons";
@@ -17,9 +14,7 @@ import Loading from "./Loading";
 function Trending() {
   const [loading, setLoading] = useState(true);
 
-  const [topThreePosts, setTopThreePosts] = useState([]); // Added state to store the top three messages
   const [trendyPosts, setTrendyPosts] = useState([]); // Added state to store the top three messages
-  const [topThreeUsers, setTopThreeUsers] = useState([]); // Added state to store the top three followed users
   const [session, setSession] = useState(null);
   const [user, setUser] = useState(null);
   const [newBalance, setBalance] = useState();
@@ -39,17 +34,6 @@ function Trending() {
       </Badge>
     ),
   ];
-  // following functions are for getting the top 3 of messages and user data
-  const getTopThreePosts = (data) => {
-    data.forEach((obj) => {
-      obj.difference = obj.likes - obj.dislikes;
-    });
-    // Sort the objects based on the difference in descending order
-    data.sort((a, b) => b.difference - a.difference);
-    // Get the top 3 objects with the highest differences
-    const top3 = data.slice(0, 3);
-    setTopThreePosts(top3);
-  };
 
   // function to get the trendy posts in desc order (likes - dislikes > 3 and views > 10)
   const getTrendyPosts = (data, minDifference = 3, minViews = 10, count = 10) => {
@@ -65,19 +49,6 @@ function Trending() {
     setTrendyPosts(topTrendy);
   };
 
-  const getTopThreeUsers = (data) => {
-    // TO DO: Will have to change in the future for actual requirements of Trendy User
-    data.forEach((obj) => {
-      obj.difference = obj.total_likes - obj.total_dislikes;
-    });
-    // Sort the objects based on the difference in descending order
-    data.sort((a, b) => b.difference - a.difference);
-    // Get the top 3 objects with the highest differences
-    const top3 = data.slice(0, 3);
-    setTopThreeUsers(top3);
-  };
-
-  // create a trendy posts function for selecting posts that :  >10 reads, #likes -#dislikes>3
   // implement logic to keep track of trendy user in db, and update 
 
   const getUser = async (user_id) => {
@@ -112,22 +83,9 @@ function Trending() {
       console.log(error);
     }
   };
-  const fetchUsers = async () => {
-    try {
-      const { data, error } = await supabase.from("user").select();
-      if (error) {
-        throw error;
-      } else if (data) {
-        getTopThreeUsers(data);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   const setUp = async () => {
     fetchMessages();
-    fetchUsers();
     setUser(getUser());
   }
 
@@ -163,10 +121,9 @@ function Trending() {
                 <div className="w-full h-48 min-h-full bg-white rounded-2xl">
                   <Post
                     message={post.message_content}
-                    likes={post.likes}
-                    dislikes={post.dislikes}
                     pid={post.id}
                     uuid={post.user_id}
+                    trendy='True'
                   />
                 </div>
               );
