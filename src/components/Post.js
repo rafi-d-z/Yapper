@@ -4,22 +4,20 @@ import { useNavigate } from "react-router-dom";
 import {
   EllipsisOutlined,
   ExclamationCircleOutlined,
-  CommentOutlined,
-  DeleteOutlined //CHANGES
+  DeleteOutlined
 } from "@ant-design/icons";
-import {getItem} from "../utils/helper_functions";
-import { Image, Badge, Dropdown, Button, Modal, Input } from "antd";
+import { getItem } from "../utils/helper_functions";
+import { Image, Dropdown } from "antd";
 import Feedback from "./Feedback";
 
 function Post(props) {
-  const { message, likes, dislikes, pid, uuid } = props;
+  // pid is the id of this particular post, uuid is the id of the user who POSTED this particular post (not the user logged in)
+  const { message, pid, uuid } = props;
   const [username, setUsername] = useState(null);
   const [subscribers, setSubscribers] = useState(null);
   const [avatarUrl, setAvatarURL] = useState(null)
-  const [isCommentOpen, setIsCommentOpen] = useState(false);
-  const [comment, setComment] = useState('');
+
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate(); 
 
   
@@ -73,28 +71,6 @@ function Post(props) {
     }
   };
 
-  const openComment = () => {
-    setIsCommentOpen(true);
-  }
-
-  const closeComment = () => {
-    setIsCommentOpen(false);
-  }
-
-  const updateComment = (e) => {
-    setComment(e.target.value);
-
-  }
-
-  const postComment = () => {
-    console.log(comment);
-    const commentResp = supabase.from("comment");
-    commentResp.insert([{
-      comment_content: comment
-    }])
-
-  }
-
   const handleDeletePost = async (postId) => { //CHANGES
     try {
       await supabase.from("message").delete().eq("id", postId);
@@ -110,16 +86,12 @@ function Post(props) {
     
   }; 
 
-  useEffect(() => { //CHANGES
-    setLoading(true);
+  useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         getUser(session?.user.id);
       }
       setUser(session?.user ?? null);
-    }).then(() => {
-      // give loading animation time to actually display by displaying it for 2 seconds after the data is fetched
-      setTimeout(() => setLoading(false), 500);
     }).catch((error) => {
       console.error("Error fetching session:", error);
     });
@@ -150,27 +122,10 @@ function Post(props) {
           <EllipsisOutlined className="text-2xl font-bold text-[#8C8C8C]" />
         </Dropdown>
       </div>
-      <div className="w-11/12 flex items-center mx-auto">
+      <div className="w-11/12 flex items-center mx-auto cursor-pointer" onClick={() => navigate('/post', {state: pid})}>
         <p className="text-base">{message}</p>
       </div>
-      <Feedback countLikes={likes} countDislikes={dislikes} countComments={likes} pid={pid} uuid={uuid} />
-      <div className="flex items-center">
-        <Button className="text-sm font-bold text-[#8C8C8C]" size="small" icon={<CommentOutlined/>} shape='round' type='text' onClick={openComment}>Comment</Button>
-        <Modal open={isCommentOpen} onCancel={closeComment} footer={<Button onClick={postComment} className="font-bold text-[#4096ff]" type='text'>Comment</Button>}>
-        <Image
-            height={45}
-            width={45}
-            className="rounded-full"
-            preview={false}
-            src={avatarUrl}
-          />
-          <p className="text-lg font-bold">{username}</p>
-          <p>{message}</p>
-          <br/>
-          <br/>
-          <Input onChange={updateComment} placeholder="Leave your thoughts!"/>
-        </Modal>
-        </div>
+      <Feedback pid={pid} uuid={uuid} />
     </div>
   );
 }
