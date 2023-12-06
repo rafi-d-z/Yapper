@@ -246,6 +246,24 @@ function LikesDislikes(props) {
     }
   }
 
+  const getUser = async (user_id) => {
+    try {
+      const { data, error } = await supabase
+        .from("user")
+        .select()
+        .eq("id", user_id);
+      if (error) {
+        throw error;
+      } else if (data) {
+        setCurUser(data[0]);
+      } else {
+        console.log("found nothing");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     // curUser is user logged in, uuid is the id of the user who posted the post
     const { isUserLoggedIn, curUser, pid, uuid } = props;
@@ -253,15 +271,24 @@ function LikesDislikes(props) {
     setPosterID(uuid);
     getTotalLikes(pid)
     getTotalDislikes(pid);
-    if (isUserLoggedIn === true) {
-      setCurUser(curUser);
-      checkIfLiked(curUser.id, pid);
-      checkIfDisliked(curUser.id, pid);
-    }
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        getUser(session?.user.id);
+        return session?.user.id;
+      } else {
+        return null;
+      }
+    }).then(( promise ) => {
+      console.log('promise:' + promise)
+      if(promise !== null){
+        // Error occurs here
+        checkIfLiked(promise, pid);
+        checkIfDisliked(promise, pid);
+      }
+    })
   }, []);
 
-  return (
-    <div className="flex gap-12">
+  return <div className="flex gap-12">
       <Badge
         count={countLikes}
         showZero={true}
@@ -269,11 +296,13 @@ function LikesDislikes(props) {
         size="small"
         color="#F0F0F0"
         onClick={
-          curUser
+          curUser !== null
             ? !isLikeActive
               ? () => like(curUser.id, pid)
               : () => unlike(curUser.id, pid)
-            : () => navigate("/auth")
+            : () => {
+              console.log(curUser)
+              navigate("/auth")}
         }
         style={{
           color: isLikeActive ? "#4096FF" : "#8C8C8C",
@@ -333,6 +362,6 @@ function LikesDislikes(props) {
         </p>
       </Badge>
     </div>
-  );
+  ;
 }
 export default LikesDislikes;

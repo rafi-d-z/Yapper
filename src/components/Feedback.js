@@ -126,7 +126,6 @@ function Feedback(props) {
         }
       } catch (error) {
         console.log(error);
-        setUser(null);
       }
     };
     supabase.auth.getSession().then(({ data: { session } }) => {
