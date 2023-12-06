@@ -14,6 +14,7 @@ function SearchResults() {
   const [loading, setLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
+  const [myUser, setMyUser] = useState(null);
 
   const getUser = async (user_id) => {
     try {
@@ -42,6 +43,24 @@ function SearchResults() {
     }
   };
 
+  const getMyUser = async (user_id) => {
+    try {
+      const { data, error } = await supabase
+        .from("user")
+        .select()
+        .eq("id", user_id);
+      if (error) {
+        throw error;
+      } else if (data) {
+        setMyUser(data[0]);
+      } else {
+        console.log("found nothing");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const getUserPosts = async (id) => {
     try {
       const { data, error } = await supabase
@@ -60,6 +79,7 @@ function SearchResults() {
       console.log(error);
     }
   };
+  
 
   const getPosts = async (search) => {
     try {
@@ -109,6 +129,43 @@ function SearchResults() {
     }
 }
 
+const handleSubscribe = async () => {
+
+  try {
+    const { data: subscriptionData, error: subscriptionError } = await supabase
+      .from('subscribers')
+      .select('user_id', myUser.id)
+      .eq ('follow_id', user.id)
+
+      
+      if (subscriptionData.length > 0) {
+        alert("You're Already Subscribed")
+      }
+      else {
+        // we add the row and col
+        
+      const { error } = await supabase
+      .from('subscribers')
+      .insert({ user_id: myUser.id, follow_id: user.id })
+
+      }
+  } catch (error) {
+    console.error('Error subscribing:', error);
+    // Handle the error, show a message, etc.
+    
+  }; 
+
+  
+/*
+  try {
+    // if the fetch didnt find anything then we are good to add ti
+  } catch (error) {
+    console.error('Error subscribing:', error);
+    // Handle the error, show a message, etc.
+  }
+  */
+};
+
   useEffect(() => {
     // if not a user, then its a search term
     // const bool = getUser(searchData);
@@ -125,7 +182,16 @@ function SearchResults() {
         checkIfUserLoggedIn()
         setTimeout(() => setLoading(false), 500);
     });
-    
+    if (setIsLoggedIn){
+      console.log("logged in")
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session?.user) {
+          getMyUser(session?.user.id);
+        }
+        setMyUser(session?.user ?? null);
+      })
+
+    }
   }, []);
   return !loading ? <div className="w-full min-h-[80vh] flex flex-col items-center mb-2">
       {user ? (
@@ -154,7 +220,15 @@ function SearchResults() {
                 <Button
                   className="text-xl font-bold w-4/12 bg-[#4096FF] text-white flex justify-center items-center"
                   type="primary"
-                  onClick={() => isLoggedIn === true ? console.log('logged') : navigate('/auth')}
+                  onClick={() => {
+                    if (isLoggedIn) {
+                      // Run the function for logged-in users
+                      handleSubscribe();
+                    } else {
+                      // Redirect to the login page for non-logged-in users
+                      navigate('/auth');
+                    }
+                  }}
                 >
                   Subscribe
                 </Button>
