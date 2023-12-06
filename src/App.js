@@ -7,6 +7,7 @@ import SearchResults from "./pages/SearchResults";
 import PostPage from "./pages/Post";
 import { Routes, Route } from 'react-router-dom';
 import Loading from "./components/Loading";
+import Requests from "./pages/Requests";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
             <Route path="searchResults" element={<SearchResults />} />
             <Route path="post" element={<PostPage />} />
             <Route path="loading" element={<Loading />} />
+            <Route path="accountRequests" element={<Requests />} />
             {/* <Route path="*" element={<NoPage />} /> */}
           </Route>
           <Route path="/auth" element={<Auth />} />
