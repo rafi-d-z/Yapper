@@ -315,8 +315,6 @@ function Feed() {
                 <div className="w-full h-48 min-h-full bg-white rounded-2xl">
                   <Post
                     message={post.message_content}
-                    likes={post.likes}
-                    dislikes={post.dislikes}
                     pid={post.id}
                     uuid={post.user_id}
                   />

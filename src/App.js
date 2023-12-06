@@ -4,6 +4,7 @@ import Feed from "./pages/Feed";
 import CorporatePage from "./pages/Corporate";
 import Jobs from "./pages/Jobs";
 import SearchResults from "./pages/SearchResults";
+import PostPage from "./pages/Post";
 import { Routes, Route } from 'react-router-dom';
 import Loading from "./components/Loading";
 import Trending from "./components/trending";
@@ -17,6 +18,7 @@ function App() {
             <Route path="corp" element={<CorporatePage />} />
             <Route path="Trending" element={<Trending />} />
             <Route path="searchResults" element={<SearchResults />} />
+            <Route path="post" element={<PostPage />} />
             <Route path="loading" element={<Loading />} />
             {/* <Route path="*" element={<NoPage />} /> */}
           </Route>
