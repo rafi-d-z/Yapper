@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../utils/supabaseClient";
+import { useNavigate } from "react-router-dom";
 import {
   EllipsisOutlined,
   ExclamationCircleOutlined,
-  CommentOutlined
+  CommentOutlined,
+  DeleteOutlined //CHANGES
 } from "@ant-design/icons";
 import {getItem} from "../utils/helper_functions";
 import { Image, Badge, Dropdown, Button, Modal, Input } from "antd";
@@ -16,15 +18,50 @@ function Post(props) {
   const [avatarUrl, setAvatarURL] = useState(null)
   const [isCommentOpen, setIsCommentOpen] = useState(false);
   const [comment, setComment] = useState('');
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate(); 
 
+  
+  const getUser = async (user_id) => { //CHANGES
+    try {
+      const { data, error } = await supabase
+        .from("user")
+        .select()
+        .eq("id", user_id);
+      if (error) {
+        throw error;
+      } else if (data) {
+        setUser(data[0]);
+      } else {
+        console.log("found nothing");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  
+  const getDeleteItem = (label, key, onClick) => ({
+    label,
+    key,
+    icon: <DeleteOutlined />,
+    onClick,
+  });
+
+  console.log("Current User:", user); 
   const items = [
     getItem(
-      "Report Message",
-      "report",
-      <ExclamationCircleOutlined className="text-[#F24E1E] text-lg" />
-    ),
+      "Report Message", 
+      "report", 
+      <ExclamationCircleOutlined />),
+    ...(user && user.id === uuid
+      ? [getDeleteItem(
+        "Delete Message", 
+        "delete", 
+        () => handleDeletePost(pid))]
+      : []),
   ];
-
+  
   const getData = async () => {
     try {
       const resp = await supabase.from("user").select().eq("id", uuid);
@@ -58,9 +95,40 @@ function Post(props) {
 
   }
 
-  useEffect(() => {
-    getData();
+  const handleDeletePost = async (postId) => { //CHANGES
+    try {
+      await supabase.from("message").delete().eq("id", postId);
+
+      // Navigate to the "/loading" route
+      navigate('/loading');
+      setTimeout(() => {
+        navigate('/');
+      }, 0);
+    } catch (error) {
+      console.error("Error deleting post:", error);
+    }
+    
+  }; 
+
+  useEffect(() => { //CHANGES
+    setLoading(true);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        getUser(session?.user.id);
+      }
+      setUser(session?.user ?? null);
+    }).then(() => {
+      // give loading animation time to actually display by displaying it for 2 seconds after the data is fetched
+      setTimeout(() => setLoading(false), 500);
+    }).catch((error) => {
+      console.error("Error fetching session:", error);
+    });
+  
+    getData(); // Moved outside of the `then` block
   }, []);
+  
+
+  console.log("Menu Items:", items);
 
   return (
     <div className="w-full h-full py-5 flex flex-col justify-between">
