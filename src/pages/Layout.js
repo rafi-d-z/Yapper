@@ -14,6 +14,7 @@ import logo from "../images/YapperLogo7.png";
 import { ConfigProvider, Layout, Menu, Image, Input, Dropdown } from "antd";
 import { supabase } from "../utils/supabaseClient";
 import { Outlet, Link } from "react-router-dom";
+import PostScheduled from "../components/ScheduleSendBackend";
 
 const { Header, Content } = Layout;
 
@@ -185,6 +186,7 @@ function LayoutPage() {
                 <Image width={50} height={50} src={logo} className="cursor-pointer" preview={false} onClick={() => {
                   setSearchTerm('')
                   navigate('/')
+                  PostScheduled()
                 }} />
                 <Dropdown
                   className="w-8/12"
