@@ -237,6 +237,8 @@ function LayoutPage() {
                   navigate("/jobs");
                 } else if (item.key === '5'){
                   navigate("/accountRequests");
+                } else if (item.key === "3") {
+                  navigate("/corp");
                 } else if (item.key === "4") {
                   navigate("/Trending");
                 }
