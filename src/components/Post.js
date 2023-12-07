@@ -233,21 +233,6 @@ function Post(props) {
       </div>
       <Feedback countLikes={likes} countDislikes={dislikes} countComments={likes} pid={pid} uuid={uuid} />
       <div className="flex items-center">
-        <Button className="text-sm font-bold text-[#8C8C8C]" size="small" icon={<CommentOutlined/>} shape='round' type='text' onClick={openComment}>Comment</Button>
-        <Modal open={isCommentOpen} onCancel={closeComment} footer={<Button onClick={postComment} className="font-bold text-[#4096ff]" type='text'>Comment</Button>}>
-        <Image
-            height={45}
-            width={45}
-            className="rounded-full"
-            preview={false}
-            src={avatarUrl}
-          />
-          <p className="text-lg font-bold">{username}</p>
-          <p>{message}</p>
-          <br/>
-          <br/>
-          <Input onChange={updateComment} placeholder="Leave your thoughts!"/>
-        </Modal>
         </div>
     </div>
   );
