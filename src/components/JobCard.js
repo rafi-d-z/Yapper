@@ -32,7 +32,7 @@ function JobCard({ job }) {
     try {
       const { error } = await supabase
         .from("user")
-        .update({ account_balance: (corpBalanace - 0.01) })
+        .update({ account_balance: (corpBalanace - 0.10) })
         .eq("id", user_id);
 
       if (error) {
