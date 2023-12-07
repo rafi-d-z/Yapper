@@ -229,7 +229,7 @@ function Post(props) {
           <EllipsisOutlined className="text-2xl font-bold text-[#8C8C8C]" />
         </Dropdown>
       </div>
-      <div className="w-11/12 flex items-center mx-auto">
+      <div className="w-11/12 flex items-center mx-auto cursor-pointer" onClick={() => navigate('/post', {state: pid})}>
         <p className="text-base">{message}</p>
       </div>
       <Feedback countLikes={likes} countDislikes={dislikes} countComments={likes} pid={pid} uuid={uuid} />
