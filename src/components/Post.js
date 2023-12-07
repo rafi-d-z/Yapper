@@ -7,12 +7,12 @@ import {
   DeleteOutlined
 } from "@ant-design/icons";
 import { getItem } from "../utils/helper_functions";
-import { Image, Dropdown } from "antd";
+import { Image, Dropdown, Badge } from "antd";
 import Feedback from "./Feedback";
 
 function Post(props) {
   // pid is the id of this particular post, uuid is the id of the user who POSTED this particular post (not the user logged in)
-  const { message, pid, uuid } = props;
+  const { message, pid, uuid, trendy } = props;
   const [username, setUsername] = useState(null);
   const [subscribers, setSubscribers] = useState(null);
   const [avatarUrl, setAvatarURL] = useState(null)
@@ -103,7 +103,9 @@ function Post(props) {
   console.log("Menu Items:", items);
 
   return (
+    
     <div className="w-full h-full py-5 flex flex-col justify-between">
+      {trendy == 'True' ? <Badge.Ribbon text="Trending" color="green"></Badge.Ribbon> : null}
       <div className="flex w-11/12 justify-between mx-auto items-center">
         <div className="flex gap-4 w-4/12 items-center">
           <Image
