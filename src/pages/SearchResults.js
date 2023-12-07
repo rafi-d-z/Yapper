@@ -134,6 +134,7 @@ const handleSubscribe = async () => {
   try {
     const { data: subscriptionData, error: subscriptionError } = await supabase
       .from('subscribers')
+      .match({user_i : myUser.id ,follow_id : user.id})
       .select('user_id', myUser.id)
       .eq ('follow_id', user.id)
 
