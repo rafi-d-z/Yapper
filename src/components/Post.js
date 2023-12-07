@@ -130,7 +130,7 @@ function Post(props) {
       handleFollowMessage),
       
       
-    ...(user && user.id === uuid
+    ...(user && (user.id === uuid || user.user_type === 'super')
       ? [getDeleteItem(
         "Delete Message", 
         "delete", 
