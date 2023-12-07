@@ -87,9 +87,11 @@ const CreateAccount = () => {
         userID = data.user.id;
         createRequest(userID);
         insertUserType();
-        openNotificationRef.message("Your request has been sent, you will get an email from a super user determining if you are accepted");
-        // sign in
-        // signIn();
+        openNotificationRef.message("Your request has been sent, you will get an email from a super user on their decision");
+        setEmail('');
+        setUsername('')
+        setFilter('ordinary');
+        handleCancel();
       } else {
         // this means account already exists
         openNotificationRef.current("Account already exists");
@@ -171,36 +173,6 @@ const CreateAccount = () => {
                 required
               />
             </Form.Item>
-            {/* <Form.Item
-              className="w-11/12 h-10 mb-2"
-              name="password"
-              rules={[
-                { required: true, message: "Please input your password!" },
-                ({ getFieldValue }) => ({
-                  validator(_, value) {
-                    if (value.length >= 6) {
-                      return Promise.resolve();
-                    }
-                    return Promise.reject(
-                      new Error(
-                        "Password must be at least 6 characters"
-                      )
-                    );
-                  },
-                }),
-              ]}
-            >
-              <Input.Password
-                className="w-full h-10 px-2"
-                type="text"
-                placeholder="Password"
-                value={password}
-                onChange={handlePasswordChange}
-                prefix={
-                  <LockOutlined className="mr-2 text-lg text-[#7C7C7C]" />
-                }
-              />
-            </Form.Item> */}
             <Form.Item
               name="type"
               rules={[
