@@ -175,7 +175,19 @@ function Feed() {
     }
     
     try{
-      const message_total = (newMessage.split(' ').join('').length * 0.1).toFixed(2)
+      let message_total;
+
+      if (user.user_type === 'ordinary') {
+        // Regular users get 20 free words
+        const wordCount = newMessage.split(/\s+/).length;
+        message_total = Math.max(wordCount - 20, 0) * 0.1;
+      } else if (user.user_type === 'corporate') {
+        // Corporate users get charged for every word
+        const wordCount = newMessage.split(/\s+/).length;
+        message_total = wordCount * 0.1;
+      } else {
+        throw new Error('Invalid user type');
+      }
 
       if (newBalance- message_total > 0){
 
