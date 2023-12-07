@@ -24,6 +24,7 @@ function Feed() {
   const [user, setUser] = useState(null);
   const [newKeywords, setKeywords] = useState([]);
   const [newBalance, setBalance] = useState();
+  const  [feed, setFeed] = useState([]);
   // temp usuage
 
   // props for upload for messages
@@ -121,6 +122,7 @@ function Feed() {
         throw error;
       } else if (data) {
         getTopThreePosts(data);
+        setFeed(data)
       }
     } catch (error) {
       console.log(error);
@@ -138,6 +140,8 @@ function Feed() {
       console.log(error);
     }
   };
+
+
 
   const setUp = async () => {
     fetchMessages();
@@ -337,6 +341,23 @@ function Feed() {
               );
             })}
           </div>
+          <div>
+            <div>FEED</div>
+            {feed.map((post) => {
+              return (
+                <div className="w-full h-48 min-h-full bg-white rounded-2xl">
+                  <Post
+                    message={post.message_content}
+                    pid={post.id}
+                    uuid={post.user_id}
+                    trendy="False"
+                  />
+                </div>
+              );
+            })}
+
+          </div>
+        
         </div>
         {/* right section (top followed users + ads) */}
         <div className="w-3/12 flex flex-col gap-5 h-fit px-4 py-5 bg-white rounded-2xl">
