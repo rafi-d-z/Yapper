@@ -5,6 +5,7 @@ import { getItem } from "../utils/helper_functions";
 import {
   HomeFilled,
   FolderOutlined,
+  RiseOutlined,
   SearchOutlined,
   AppstoreOutlined,
   PaperClipOutlined,
@@ -220,6 +221,7 @@ function LayoutPage() {
                 user !== null && user.user_type === "corporate"
                   ? getItem("Ads / Jobs", "3", <FolderOutlined />)
                   : null,
+                  getItem("Trending", "4", <RiseOutlined />)
                 // getItem("Sign in", "3", <LoginOutlined />),
               ]}
               className="w-5/12"
@@ -229,6 +231,8 @@ function LayoutPage() {
                   navigate("/");
                 } else if (item.key === "2") {
                   navigate("/jobs");
+                } else if (item.key === "4") {
+                  navigate("/Trending");
                 }
               }}
             />

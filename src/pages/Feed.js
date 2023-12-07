@@ -317,6 +317,7 @@ function Feed() {
                     message={post.message_content}
                     pid={post.id}
                     uuid={post.user_id}
+                    trendy="False"
                   />
                 </div>
               );

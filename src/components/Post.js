@@ -5,14 +5,15 @@ import {
   EllipsisOutlined,
   ExclamationCircleOutlined,
   CommentOutlined,
-  DeleteOutlined //CHANGES
+  DeleteOutlined, //CHANGES,
+  HeartOutlined
 } from "@ant-design/icons";
 import {getItem} from "../utils/helper_functions";
 import { Image, Badge, Dropdown, Button, Modal, Input } from "antd";
 import Feedback from "./Feedback";
 
 function Post(props) {
-  const { message, likes, dislikes, pid, uuid } = props;
+  const { message, likes, dislikes, pid, uuid, trendy } = props;
   const [username, setUsername] = useState(null);
   const [subscribers, setSubscribers] = useState(null);
   const [avatarUrl, setAvatarURL] = useState(null)
@@ -74,6 +75,46 @@ function Post(props) {
       console.error("Error reporting message:", error);
     }
   };
+  const handleFollowMessage = async () => {
+    if (!user || !user.id) {
+      // User is not logged in, handle accordingly (e.g., redirect to login)
+      navigate("/auth");
+      return;
+    }
+    if (user.id == null){
+      
+    }
+    try { 
+      let { data: follow_message, error } = await supabase
+      .from('follow_message')
+      .select() 
+      .match({ follower_id: user.id, message_id: pid })
+      if (error) {
+        throw error;
+      } else if (follow_message) {
+        console.log(follow_message);
+      } else {
+        console.log("found nothing");
+      }
+
+
+      if (follow_message.length > 0) {
+        alert("You already follow this message")
+      }
+      else{
+        const { data, error } = await supabase
+        .from('follow_message')
+        .insert([
+          { follower_id: user.id, message_id: pid },
+        ])
+        .select()
+
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    
+  };
 
   console.log("Current User:", user); 
   const items = [
@@ -82,6 +123,13 @@ function Post(props) {
       "report", 
       () => handleReportMessage(pid)
     ),
+
+      getItem("Follow Message",
+       "follow",
+      <HeartOutlined />,
+      handleFollowMessage),
+      
+      
     ...(user && user.id === uuid
       ? [getDeleteItem(
         "Delete Message", 
@@ -159,7 +207,9 @@ function Post(props) {
   console.log("Menu Items:", items);
 
   return (
+    
     <div className="w-full h-full py-5 flex flex-col justify-between">
+      {trendy == 'True' ? <Badge.Ribbon text="Trending" color="green"></Badge.Ribbon> : null}
       <div className="flex w-11/12 justify-between mx-auto items-center">
         <div className="flex gap-4 w-4/12 items-center">
           <Image
