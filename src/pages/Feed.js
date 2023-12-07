@@ -1,4 +1,4 @@
-import { Input, Button, Image, Upload, Dropdown, Badge, Modal } from "antd";
+import { Input, Button, Image, Upload, Dropdown, Badge, Modal, DatePicker, TimePicker } from "antd";
 import {
   PictureOutlined,
   FileGifOutlined,
@@ -24,6 +24,7 @@ function Feed() {
   const [user, setUser] = useState(null);
   const [newKeywords, setKeywords] = useState([]);
   const [newBalance, setBalance] = useState();
+  const [scheduleSendOpen, setScheduleSendOpen] = useState(false);
   // temp usuage
 
   // props for upload for messages
@@ -53,21 +54,45 @@ function Feed() {
       console.log(info.fileList);
     },
   };
+
+  const getScheduleSend = (label, key, onClick) => ({
+    label,
+    key,
+    icon: <Badge
+    offset={[0, 12]}
+    count={
+      <ClockCircleOutlined className="text-[#4096FF] text-xs overflow-hidden font-bold" />
+    }
+  >
+    <SendOutlined className="text-[#4096FF] text-sm overflow-hidden" />
+  </Badge>,
+    onClick,
+  });
   // items for dropdown on post creation button
   const items = [
-    getItem(
+    getScheduleSend(
       "Schedule Send",
       "schedule",
-      <Badge
-        offset={[0, 12]}
-        count={
-          <ClockCircleOutlined className="text-[#4096FF] text-xs overflow-hidden font-bold" />
-        }
-      >
-        <SendOutlined className="text-[#4096FF] text-sm overflow-hidden" />
-      </Badge>
-    ),
+      () => handleScheduleSend()),
   ];
+
+  const closeScheduleSend = () => {
+    setScheduleSendOpen(false);
+  }
+
+  const handleScheduleSend = () => {
+    setScheduleSendOpen(true);
+    console.log(scheduleSendOpen)
+  };
+
+  const setDate = (date, dateString) => {
+    console.log(date, dateString);
+  }
+
+  const setTime = (time, timeString) => {
+    console.log(time, timeString);
+  }
+
   // following functions are for getting the top 3 of messages and user data
   const getTopThreePosts = (data) => {
     data.forEach((obj) => {
@@ -303,6 +328,8 @@ function Feed() {
                     >
                       Submit
                     </Dropdown.Button>
+
+
                   </div>
                 </div>
               </div>
@@ -340,6 +367,12 @@ function Feed() {
           </div>
         </div>
       </div>
+      <Modal title="Schedule Send" open={scheduleSendOpen} onOk={closeScheduleSend} onCancel={closeScheduleSend}>
+        <p>Here is where you schedule your send.</p>
+        <p>Epic Fortnite.</p>
+        <br/>
+        <DatePicker onChange={setDate}/>   <TimePicker use12Hours={true} onChange={setTime}/>
+      </Modal>
     </div> : <Loading />
   );
 }
