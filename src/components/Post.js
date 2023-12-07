@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 import {
   EllipsisOutlined,
   ExclamationCircleOutlined,
-  DeleteOutlined
+  DeleteOutlined,
+  HeartOutlined
 } from "@ant-design/icons";
 import { getItem } from "../utils/helper_functions";
 import { Image, Dropdown } from "antd";
@@ -45,6 +46,46 @@ function Post(props) {
     icon: <DeleteOutlined />,
     onClick,
   });
+  const handleFollowMessage = async () => {
+    if (!user || !user.id) {
+      // User is not logged in, handle accordingly (e.g., redirect to login)
+      navigate("/auth");
+      return;
+    }
+    if (user.id == null){
+      
+    }
+    try { 
+      let { data: follow_message, error } = await supabase
+      .from('follow_message')
+      .select() 
+      .match({ follower_id: user.id, message_id: pid })
+      if (error) {
+        throw error;
+      } else if (follow_message) {
+        console.log(follow_message);
+      } else {
+        console.log("found nothing");
+      }
+
+
+      if (follow_message.length > 0) {
+        alert("You already follow this message")
+      }
+      else{
+        const { data, error } = await supabase
+        .from('follow_message')
+        .insert([
+          { follower_id: user.id, message_id: pid },
+        ])
+        .select()
+
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    
+  };
 
   console.log("Current User:", user); 
   const items = [
@@ -52,6 +93,13 @@ function Post(props) {
       "Report Message", 
       "report", 
       <ExclamationCircleOutlined />),
+
+      getItem("Follow Message",
+       "follow",
+      <HeartOutlined />,
+      handleFollowMessage),
+      
+      
     ...(user && user.id === uuid
       ? [getDeleteItem(
         "Delete Message", 
