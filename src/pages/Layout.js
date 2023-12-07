@@ -10,6 +10,7 @@ import {
   AppstoreOutlined,
   PaperClipOutlined,
   HistoryOutlined,
+  DashboardOutlined
 } from "@ant-design/icons";
 import logo from "../images/YapperLogo7.png";
 import { ConfigProvider, Layout, Menu, Image, Input, Dropdown } from "antd";
@@ -223,8 +224,9 @@ function LayoutPage() {
                 user !== null && user.user_type === "corporate"
                   ? getItem("Ads / Jobs", "3", <FolderOutlined />)
                   : null,
-                  getItem("Trending", "4", <RiseOutlined />)
-                // getItem("Sign in", "3", <LoginOutlined />),
+                  getItem("Trending", "4", <RiseOutlined />),
+                user !== null && user.user_type === 'super' ? getItem("Rules", "8", <DashboardOutlined />) : null,
+                
               ]}
               className="w-5/12"
               // When a tab is selected, we change the state variable so that we can keep track of which page to be on
@@ -235,6 +237,8 @@ function LayoutPage() {
                   navigate("/jobs");
                 } else if (item.key === "4") {
                   navigate("/Trending");
+                } else if (item.key === '8'){
+                  navigate('/rules')
                 }
               }}
             />
