@@ -13,7 +13,7 @@ import { Image, Badge, Dropdown, Button, Modal, Input } from "antd";
 import Feedback from "./Feedback";
 
 function Post(props) {
-  const { message, likes, dislikes, pid, uuid, trendy } = props;
+  const { message, likes, dislikes, pid, uuid, trendy, views } = props;
   const [username, setUsername] = useState(null);
   const [subscribers, setSubscribers] = useState(null);
   const [avatarUrl, setAvatarURL] = useState(null)
@@ -75,6 +75,7 @@ function Post(props) {
       console.error("Error reporting message:", error);
     }
   };
+
   const handleFollowMessage = async () => {
     if (!user || !user.id) {
       // User is not logged in, handle accordingly (e.g., redirect to login)
@@ -228,10 +229,11 @@ function Post(props) {
           <EllipsisOutlined className="text-2xl font-bold text-[#8C8C8C]" />
         </Dropdown>
       </div>
-      <div className="w-11/12 flex items-center mx-auto">
+      <div className="w-11/12 flex items-center mx-auto cursor-pointer" onClick={() => navigate('/post', {state: pid})}>
         <p className="text-base">{message}</p>
       </div>
       <Feedback countLikes={likes} countDislikes={dislikes} countComments={likes} pid={pid} uuid={uuid} />
+      {Number.isInteger(views) ? <div className="w-11/12 mx-auto text-[#8C8C8C]">Seen {views} times</div> : <></>}
       <div className="flex items-center">
         </div>
     </div>
