@@ -1,19 +1,62 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "../utils/supabaseClient";
-import { Image, Divider, Button } from "antd";
+import { Image, Divider, Button, Dropdown } from "antd";
+import { EllipsisOutlined, DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import Loading from "../components/Loading";
 import Post from "../components/Post";
+import { getItem } from "../utils/helper_functions";
+import { supabaseAdmin } from "../utils/supabaseClient";
 
 function SearchResults() {
   const location = useLocation();
   const searchData = location.state;
   const [user, setUser] = useState(null);
+  const [curUserSuper, setCurUserSuper] = useState(false)
   const [isUserSearch, setIsUserSearch] = useState(false);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
+
+  const getDeleteItem = (label, key, onClick) => ({
+    label,
+    key,
+    icon: <DeleteOutlined />,
+    onClick,
+  });
+
+  const items = [
+    getItem(
+      "Report User", 
+      "report", 
+      <ExclamationCircleOutlined />),
+    ...(user && (curUserSuper === true)
+      ? [getDeleteItem(
+        "Delete User", 
+        "delete", 
+        () => handleDeleteUser(user.id))]
+      : []),
+  ];
+
+  const handleDeleteUser = async (user_id) => {
+    try {
+      const { data, error } = await supabaseAdmin.auth.admin.deleteUser(
+        user_id
+      );
+      if (error) {
+        throw error;
+      } else if (data) {
+        console.log(data);
+        navigate('/loading');
+        setTimeout(() => {
+          navigate('/');
+        }, 0);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   const getUser = async (user_id) => {
     try {
@@ -98,10 +141,21 @@ function SearchResults() {
         if(error){
             throw error;
         } else if (data){
+            console.log('post:')
+            console.log(data)
             if(data.session === null){
                 setIsLoggedIn(false)
             } else {
                 setIsLoggedIn(true);
+                const resp = await supabase.from('user').select('user_type').eq('id', data.session.user.id)
+                if(resp.error){
+                  throw resp.error
+                } else if (resp.data){
+                  console.log(resp.data[0].user_type)
+                  if(resp.data[0].user_type === 'super'){
+                    setCurUserSuper(true);
+                  }
+                }
             }
         }
     } catch (error){
@@ -141,7 +195,12 @@ function SearchResults() {
               />
             </div>
             <div className="flex-col w-full">
-              <p className="text-2xl font-bold">{user.user_name}</p>
+              <div className="flex justify-between">
+                <p className="text-2xl font-bold">{user.user_name}</p>
+                <Dropdown menu={{ items }} >
+                  <EllipsisOutlined className="text-2xl font-bold text-[#8C8C8C]" />
+                </Dropdown>
+              </div>
               <div className="flex gap-2 items-center text-[#7C7C7C]">
                 <p className="text-base">{user.subscribers} subscribers</p>
                 <Divider orientation="center" type="vertical" />

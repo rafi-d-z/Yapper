@@ -52,7 +52,7 @@ function Post(props) {
       "Report Message", 
       "report", 
       <ExclamationCircleOutlined />),
-    ...(user && user.id === uuid
+    ...(user && (user.id === uuid || user.user_type === 'super')
       ? [getDeleteItem(
         "Delete Message", 
         "delete", 

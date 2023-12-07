@@ -2,8 +2,11 @@ import { Image, Dropdown } from "antd";
 import { DownOutlined, SettingOutlined, LogoutOutlined } from "@ant-design/icons";
 import { supabase } from "../utils/supabaseClient";
 import { getItem } from "../utils/helper_functions";
+import { useNavigate } from "react-router-dom";
 
 function Profile_Nav(props) {
+  const navigate = useNavigate();
+
   const items = [
     getItem("Settings", "1", <SettingOutlined />),
     getItem("Logout", "2", <LogoutOutlined />),
@@ -26,6 +29,7 @@ function Profile_Nav(props) {
         if(error){
             throw error
         }
+        navigate('/')
         reloadPage();
     } catch (error) {
         console.log(error)
@@ -36,7 +40,7 @@ function Profile_Nav(props) {
     <Dropdown
     placement="bottomCenter"
     className="w-8/12"
-    trigger={'click'}
+    trigger={'hover'}
     menu={{ 
         onClick: handleDropdownItemClick,
         items: items }}

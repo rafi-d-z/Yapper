@@ -10,7 +10,6 @@ const CreateAccount = () => {
   const [filter, setFilter] = useState("ordinary"); // handle ordinary user choice
   // account credentials
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   var userID = "";
   // routing navigate function
@@ -31,22 +30,19 @@ const CreateAccount = () => {
       openNotificationRef.current(error.message);
     }
   }
-  async function signIn() {
+  async function createRequest(user_id){
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: password,
-      });
-      if (error) {
-        openNotificationRef.current(error.message);
+      const { data, error } = await supabase.from("requests").insert([{ uuid: user_id }])
+      console.log("created")
+      if(error){
+        throw error;
       } else {
-        navigate("/");
+        console.log(data)
       }
-    } catch (error) {
-      openNotificationRef.current(error.message);
+    } catch (error){
+      console.log(error)
     }
   }
-
   // variables for error notification
   const [api, contextHolder] = notification.useNotification();
   const openNotificationRef = useRef();
@@ -59,6 +55,12 @@ const CreateAccount = () => {
         placement: "top",
       });
     };
+    openNotificationRef.message = (message) => {
+      api.success({
+        message: `${message}`,
+        placement: "top",
+      });
+    };
   }, [api]);
 
   // Define functions to handle input changes
@@ -66,20 +68,16 @@ const CreateAccount = () => {
     setEmail(e.target.value);
   };
 
-  const handlePasswordChange = (e) => {
-    setPassword(e.target.value);
-  };
-
   const handleUsernameChange = (e) => {
     setUsername(e.target.value);
   };
 
   const handleCreateAccount = async () => {
+    const password = '79502a6ed32a59b7eebc96465e455761'
     const { data, error } = await supabase.auth.signUp({
       email: email,
       password: password,
     });
-
     if (error) {
       openNotificationRef.current(error.message);
     } else if (data) {
@@ -87,9 +85,11 @@ const CreateAccount = () => {
       // TODO: when user puts password, under 6 characters, it gives error so have to make UI aspect of it
       if (data.user.identities?.length > 0) {
         userID = data.user.id;
+        createRequest(userID);
         insertUserType();
+        openNotificationRef.message("Your request has been sent, you will get an email from a super user determining if you are accepted");
         // sign in
-        signIn();
+        // signIn();
       } else {
         // this means account already exists
         openNotificationRef.current("Account already exists");
@@ -97,7 +97,6 @@ const CreateAccount = () => {
     }
 
     setEmail("");
-    setPassword("");
     setUsername("");
     setFilter("");
   };
@@ -172,7 +171,7 @@ const CreateAccount = () => {
                 required
               />
             </Form.Item>
-            <Form.Item
+            {/* <Form.Item
               className="w-11/12 h-10 mb-2"
               name="password"
               rules={[
@@ -201,7 +200,7 @@ const CreateAccount = () => {
                   <LockOutlined className="mr-2 text-lg text-[#7C7C7C]" />
                 }
               />
-            </Form.Item>
+            </Form.Item> */}
             <Form.Item
               name="type"
               rules={[
