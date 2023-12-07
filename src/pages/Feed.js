@@ -1,4 +1,4 @@
-import { Input, Button, Image, Upload, Dropdown, Badge, Modal } from "antd";
+import { Input, Button, Image, Upload, Dropdown, Badge, Modal, DatePicker, TimePicker } from "antd";
 import {
   PictureOutlined,
   FileGifOutlined,
@@ -24,6 +24,14 @@ function Feed() {
   const [user, setUser] = useState(null);
   const [newKeywords, setKeywords] = useState([]);
   const [newBalance, setBalance] = useState();
+  const  [feed, setFeed] = useState([]);
+  const [scheduleSendOpen, setScheduleSendOpen] = useState(false);
+  const [scheduledDate, setScheduledDate] = useState("");
+  const [scheduledTime, setScheduledTime] = useState("");
+  const [scheduledTimestamp, setScheduledTimestamp] = useState(null);
+  const [timestampMessage, setTimestampMessage] = useState("");
+  const [schedulingSend, setSchedulingSend] = useState(false)
+
   // temp usuage
 
   // props for upload for messages
@@ -53,21 +61,65 @@ function Feed() {
       console.log(info.fileList);
     },
   };
+
+  const getScheduleSend = (label, key, onClick) => ({
+    label,
+    key,
+    icon: <Badge
+    offset={[0, 12]}
+    count={
+      <ClockCircleOutlined className="text-[#4096FF] text-xs overflow-hidden font-bold" />
+    }
+  >
+    <SendOutlined className="text-[#4096FF] text-sm overflow-hidden" />
+  </Badge>,
+    onClick,
+  });
   // items for dropdown on post creation button
   const items = [
-    getItem(
+    getScheduleSend(
       "Schedule Send",
       "schedule",
-      <Badge
-        offset={[0, 12]}
-        count={
-          <ClockCircleOutlined className="text-[#4096FF] text-xs overflow-hidden font-bold" />
-        }
-      >
-        <SendOutlined className="text-[#4096FF] text-sm overflow-hidden" />
-      </Badge>
-    ),
+      () => openScheduleSend()),
   ];
+
+  const closeScheduleSend = () => {
+    setScheduleSendOpen(false);
+  }
+
+  const openScheduleSend = () => {
+    setScheduleSendOpen(true);
+  };
+
+  const setDate = (date, dateString) => {
+    console.log(dateString);
+    setScheduledDate(dateString);
+  }
+
+  const setTime = (time, timeString) => {
+    console.log(timeString);
+    setScheduledTime(timeString);
+  }
+
+  const scheduleSend = () => {
+    setSchedulingSend(true);
+    setScheduleSendOpen(false);
+    let timestamp = scheduledDate + 'T' + scheduledTime;
+    let timestamp1 = new Date(Date.parse(timestamp))
+    setScheduledTimestamp(timestamp1)
+    console.log(timestamp1);
+    console.log(schedulingSend);
+    let tsMessage = "Your message will be posted at " + scheduledTime + ' on ' + scheduledDate;
+    setTimestampMessage(tsMessage);
+  }
+
+  const unscheduleSend = () => {
+    setSchedulingSend(false);
+    setScheduleSendOpen(false);
+    console.log(schedulingSend);
+    setTimestampMessage('');
+  }
+
   // following functions are for getting the top 3 of messages and user data
   const getTopThreePosts = (data) => {
     data.forEach((obj) => {
@@ -121,6 +173,7 @@ function Feed() {
         throw error;
       } else if (data) {
         getTopThreePosts(data);
+        setFeed(data)
       }
     } catch (error) {
       console.log(error);
@@ -138,6 +191,8 @@ function Feed() {
       console.log(error);
     }
   };
+
+
 
   const setUp = async () => {
     fetchMessages();
@@ -175,9 +230,25 @@ function Feed() {
     }
     
     try{
-      const message_total = (newMessage.split(' ').join('').length * 0.1).toFixed(2)
+      let message_total;
+      
+      if (user.user_type === 'ordinary' ||
+          user.user_type === 'trendy' ||
+          user.user_type === 'super' ) {
+        // Regular users get 20 free words
+        const wordCount = newMessage.split(/\s+/).length;
+        message_total = Math.max(wordCount - 20, 0) * 0.1;
+      } else if (user.user_type === 'corporate') {
+        // Corporate users get charged for every word
+        const wordCount = newMessage.split(/\s+/).length;
+        message_total = wordCount * 0.1;
+      } else {
+        throw new Error('Invalid user type');
+      }
 
       if (newBalance- message_total > 0){
+
+        if(!schedulingSend){
 
         const keyWordList = newKeywords.split(",").map((keyword) => keyword.trim())
         const { data: insertData, error: insertError } = await supabase
@@ -192,9 +263,31 @@ function Feed() {
 
 
           ]);
+
           if (insertError) {
             throw insertError;
-          } 
+          }
+        }
+
+        if(schedulingSend){
+          const keyWordList = newKeywords.split(",").map((keyword) => keyword.trim())
+          const { data: insertData, error: insertError } = await supabase
+          .from("scheduled")
+          .insert([
+            {
+              user_id: user.id,
+              message_content: newMessage,
+              keywords: keyWordList,
+              post_at: scheduledTimestamp,
+            },
+          ])
+          setSchedulingSend(false);
+
+          if (insertError) {
+            throw insertError;
+          }
+
+        }
 
         const {data: updateData, data: updatError} = await supabase
           .from('user')
@@ -272,8 +365,7 @@ function Feed() {
                   value={newKeywords}
                   onChange={handleKeywordsChange} // This will need to fire with the message above
                   
-                />
-                
+                />                
               </div>
                 <div className="flex justify-between w-11/12">
                   <div className="flex justify-between w-3/12">
@@ -303,6 +395,8 @@ function Feed() {
                     >
                       Submit
                     </Dropdown.Button>
+
+
                   </div>
                 </div>
               </div>
@@ -317,11 +411,29 @@ function Feed() {
                     message={post.message_content}
                     pid={post.id}
                     uuid={post.user_id}
+                    trendy="False"
                   />
                 </div>
               );
             })}
           </div>
+          <div className=" items-center flex flex-col gap-4">
+          <div className="text-2xl font-bold my-4">Normal Feed</div>
+            {feed.map((post) => {
+              return (
+                <div className="w-full h-48 min-h-full bg-white rounded-2xl">
+                  <Post
+                    message={post.message_content}
+                    pid={post.id}
+                    uuid={post.user_id}
+                    trendy="False"
+                  />
+                </div>
+              );
+            })}
+
+          </div>
+        
         </div>
         {/* right section (top followed users + ads) */}
         <div className="w-3/12 flex flex-col gap-5 h-fit px-4 py-5 bg-white rounded-2xl">
@@ -340,6 +452,20 @@ function Feed() {
           </div>
         </div>
       </div>
+      <Modal title="Schedule Send" open={scheduleSendOpen} onOk={closeScheduleSend} onCancel={closeScheduleSend}
+      footer={
+        <div>
+        <Button style={{padding:'0px 5px'}} onClick={scheduleSend}>Schedule Send</Button>
+        <Button style={{padding:'0px 5px'}} onClick={unscheduleSend}>Cancel</Button>
+        </div>
+      }>
+        <p>Here is where you schedule your send.</p>
+        <p>Epic Fortnite.</p>
+        <br/>
+        <DatePicker onChange={setDate}/>   <TimePicker onChange={setTime}/>
+        <br/>
+        <p style={{fontWeight:'bold',fontSize:'10'}}>{timestampMessage}</p>
+      </Modal>
     </div> : <Loading />
   );
 }

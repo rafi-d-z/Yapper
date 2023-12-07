@@ -5,6 +5,7 @@ import { getItem } from "../utils/helper_functions";
 import {
   HomeFilled,
   FolderOutlined,
+  RiseOutlined,
   SearchOutlined,
   AppstoreOutlined,
   PaperClipOutlined,
@@ -15,6 +16,7 @@ import logo from "../images/YapperLogo7.png";
 import { ConfigProvider, Layout, Menu, Image, Input, Dropdown } from "antd";
 import { supabase } from "../utils/supabaseClient";
 import { Outlet, Link } from "react-router-dom";
+import PostScheduled from "../components/ScheduleSendBackend";
 
 const { Header, Content } = Layout;
 
@@ -186,6 +188,7 @@ function LayoutPage() {
                 <Image width={50} height={50} src={logo} className="cursor-pointer" preview={false} onClick={() => {
                   setSearchTerm('')
                   navigate('/')
+                  PostScheduled()
                 }} />
                 <Dropdown
                   className="w-8/12"
@@ -221,7 +224,8 @@ function LayoutPage() {
                 user !== null && user.user_type === "corporate"
                   ? getItem("Ads / Jobs", "3", <FolderOutlined />)
                   : null,
-                user !== null && user.user_type === 'super' ? getItem("Account Requests", "4", <UsergroupAddOutlined />) : null,
+                user !== null && user.user_type === 'super' ? getItem("Account Requests", "5", <UsergroupAddOutlined />) : null,
+                  getItem("Trending", "4", <RiseOutlined />)
                 // getItem("Sign in", "3", <LoginOutlined />),
               ]}
               className="w-5/12"
@@ -231,8 +235,10 @@ function LayoutPage() {
                   navigate("/");
                 } else if (item.key === "2") {
                   navigate("/jobs");
-                } else if (item.key === '4'){
+                } else if (item.key === '5'){
                   navigate("/accountRequests");
+                } else if (item.key === "4") {
+                  navigate("/Trending");
                 }
               }}
             />
