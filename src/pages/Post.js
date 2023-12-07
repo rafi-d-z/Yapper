@@ -27,6 +27,7 @@ function PostPage() {
       } else if (data) {
         setPost(data[0]);
         getComments(pid);
+        updateView(pid)
       } else {
         console.log("found nothing");
       }
@@ -92,6 +93,27 @@ function PostPage() {
     }
   };
 
+  const updateView = async (post_id) => {
+    console.log('here')
+    try {
+      const totalViews = await supabase
+          .from("message")
+          .select("views")
+          .eq("id", post_id);
+      console.log(totalViews.data[0])
+     
+      const { error } = await supabase
+        .from("message")
+        .update({ views: parseInt(totalViews.data[0].views + 1) })
+        .eq("id", post_id);
+      if (error) {
+        throw error;
+      }
+      } catch (error) {
+      console.error("Error reporting message:", error);
+    }
+  }
+
   useEffect(() => {
     getPost(searchData);
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -108,6 +130,7 @@ function PostPage() {
           message={post.message_content}
           pid={post.id}
           uuid={post.user_id}
+          views={post.views + 1}
         />
       </div>
       <div className="w-5/12 bg-white rounded-2xl h-fit gap-4 py-4">
