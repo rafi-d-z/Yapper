@@ -341,8 +341,8 @@ function Feed() {
               );
             })}
           </div>
-          <div>
-            <div>FEED</div>
+          <div className=" items-center flex flex-col gap-4">
+          <div className="text-2xl font-bold my-4">Normal Feed</div>
             {feed.map((post) => {
               return (
                 <div className="w-full h-48 min-h-full bg-white rounded-2xl">
