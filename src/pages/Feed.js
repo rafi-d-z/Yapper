@@ -25,6 +25,12 @@ function Feed() {
   const [newKeywords, setKeywords] = useState([]);
   const [newBalance, setBalance] = useState();
   const [scheduleSendOpen, setScheduleSendOpen] = useState(false);
+  const [scheduledDate, setScheduledDate] = useState("");
+  const [scheduledTime, setScheduledTime] = useState("");
+  const [scheduledTimestamp, setScheduledTimestamp] = useState(null);
+  const [timestampMessage, setTimestampMessage] = useState("");
+  const [schedulingSend, setSchedulingSend] = useState(false)
+
   // temp usuage
 
   // props for upload for messages
@@ -73,24 +79,44 @@ function Feed() {
     getScheduleSend(
       "Schedule Send",
       "schedule",
-      () => handleScheduleSend()),
+      () => openScheduleSend()),
   ];
 
   const closeScheduleSend = () => {
     setScheduleSendOpen(false);
   }
 
-  const handleScheduleSend = () => {
+  const openScheduleSend = () => {
     setScheduleSendOpen(true);
-    console.log(scheduleSendOpen)
   };
 
   const setDate = (date, dateString) => {
-    console.log(date, dateString);
+    console.log(dateString);
+    setScheduledDate(dateString);
   }
 
   const setTime = (time, timeString) => {
-    console.log(time, timeString);
+    console.log(timeString);
+    setScheduledTime(timeString);
+  }
+
+  const scheduleSend = () => {
+    setSchedulingSend(true);
+    setScheduleSendOpen(false);
+    let timestamp = scheduledDate + 'T' + scheduledTime;
+    let timestamp1 = new Date(Date.parse(timestamp))
+    setScheduledTimestamp(timestamp1)
+    console.log(timestamp1);
+    console.log(schedulingSend);
+    let tsMessage = "Your message will be posted at " + scheduledTime + ' on ' + scheduledDate;
+    setTimestampMessage(tsMessage);
+  }
+
+  const unscheduleSend = () => {
+    setSchedulingSend(false);
+    setScheduleSendOpen(false);
+    console.log(schedulingSend);
+    setTimestampMessage('');
   }
 
   // following functions are for getting the top 3 of messages and user data
@@ -204,6 +230,8 @@ function Feed() {
 
       if (newBalance- message_total > 0){
 
+        if(!schedulingSend){
+
         const keyWordList = newKeywords.split(",").map((keyword) => keyword.trim())
         const { data: insertData, error: insertError } = await supabase
           .from("message")
@@ -217,9 +245,31 @@ function Feed() {
 
 
           ]);
+
           if (insertError) {
             throw insertError;
-          } 
+          }
+        }
+
+        if(schedulingSend){
+          const keyWordList = newKeywords.split(",").map((keyword) => keyword.trim())
+          const { data: insertData, error: insertError } = await supabase
+          .from("scheduled")
+          .insert([
+            {
+              user_id: user.id,
+              message_content: newMessage,
+              keywords: keyWordList,
+              post_at: scheduledTimestamp,
+            },
+          ])
+          setSchedulingSend(false);
+
+          if (insertError) {
+            throw insertError;
+          }
+
+        }
 
         const {data: updateData, data: updatError} = await supabase
           .from('user')
@@ -297,8 +347,7 @@ function Feed() {
                   value={newKeywords}
                   onChange={handleKeywordsChange} // This will need to fire with the message above
                   
-                />
-                
+                />                
               </div>
                 <div className="flex justify-between w-11/12">
                   <div className="flex justify-between w-3/12">
@@ -367,11 +416,19 @@ function Feed() {
           </div>
         </div>
       </div>
-      <Modal title="Schedule Send" open={scheduleSendOpen} onOk={closeScheduleSend} onCancel={closeScheduleSend}>
+      <Modal title="Schedule Send" open={scheduleSendOpen} onOk={closeScheduleSend} onCancel={closeScheduleSend}
+      footer={
+        <div>
+        <Button style={{padding:'0px 5px'}} onClick={scheduleSend}>Schedule Send</Button>
+        <Button style={{padding:'0px 5px'}} onClick={unscheduleSend}>Cancel</Button>
+        </div>
+      }>
         <p>Here is where you schedule your send.</p>
         <p>Epic Fortnite.</p>
         <br/>
-        <DatePicker onChange={setDate}/>   <TimePicker use12Hours={true} onChange={setTime}/>
+        <DatePicker onChange={setDate}/>   <TimePicker onChange={setTime}/>
+        <br/>
+        <p style={{fontWeight:'bold',fontSize:'10'}}>{timestampMessage}</p>
       </Modal>
     </div> : <Loading />
   );
