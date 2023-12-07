@@ -176,8 +176,10 @@ function Feed() {
     
     try{
       let message_total;
-
-      if (user.user_type === 'ordinary') {
+      
+      if (user.user_type === 'ordinary' ||
+          user.user_type === 'trendy' ||
+          user.user_type === 'super' ) {
         // Regular users get 20 free words
         const wordCount = newMessage.split(/\s+/).length;
         message_total = Math.max(wordCount - 20, 0) * 0.1;
