@@ -233,6 +233,8 @@ function LayoutPage() {
                   navigate("/");
                 } else if (item.key === "2") {
                   navigate("/jobs");
+                } else if (item.key === "3") {
+                  navigate("/corp");
                 } else if (item.key === "4") {
                   navigate("/Trending");
                 }
